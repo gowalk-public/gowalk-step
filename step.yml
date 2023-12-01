@@ -8,6 +8,9 @@ host_os_tags:
 project_type_tags: []
 type_tags:
 - utility
+is_requires_admin_user: true
+is_always_run: false
+is_skippable: false
 inputs:
 - remove_package_resolved: "yes"
   opts:
@@ -33,6 +36,3 @@ inputs:
     value_options:
     - "no"
     - "yes"
-is_requires_admin_user: true
-is_always_run: false
-is_skippable: false
