@@ -5,10 +5,10 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
 #import config
-source variables.sh
+source "${THIS_SCRIPT_DIR}/variables.sh"
 
 #import script
-content=$(<script.sh)
+content=$(<"${THIS_SCRIPT_DIR}/script.sh")
 
 if [ -z "${content}" ] ; then
 	echo " [!] => Failed: No script (content) defined for execution!"
