@@ -34,8 +34,17 @@ code_sign_style=$(update_project 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = M
 development_team=$(update_project 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/' '/DEVELOPMENT_TEAM/{s/DEVELOPMENT_TEAM = //;s/;//;s/^[[:space:]]*//;p;q;}')
 
 # Remove Package.resolved files
-sudo rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
-sudo rm -rf "./$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+if [ "$remove_package_resolved" = "yes" ]; then
+    sudo rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
+    sudo rm -rf "./$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+fi
 
-# Explicit success exit code
-exit 0
+# Remove Podfile.lock
+if [ "$remove_podsfile_lock" = "yes" ]; then
+    sudo rm -rf "./Podfile.lock"
+fi
+
+# Remove Pods
+if [ "$remove_pods" = "yes" ]; then
+    sudo rm -rf "./Pods/"
+fi

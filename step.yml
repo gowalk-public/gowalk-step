@@ -4,6 +4,31 @@ summary: |-
 website: https://gowalk.com
 source_code_url: https://github.com/gowalk-public/gowalk-step
 support_url: https://github.com/gowalk-public/gowalk-step/issues
+inputs:
+  - remove_package_resolved: "yes"
+    opts:
+      category: Config
+      title: "Remove Package.resolved before build?"
+      is_required: true
+      value_options:
+        - "no"
+        - "yes"
+  - remove_pods: "yes"
+    opts:
+      category: Config
+      title: "Remove Pods directory before pod install?"
+      is_required: true
+      value_options:
+        - "no"
+        - "yes"
+   - remove_podsfile_lock: "yes"
+    opts:
+      category: Config
+      title: "Remove Podfile.lock before pod install?"
+      is_required: true
+      value_options:
+        - "no"
+        - "yes"
 host_os_tags:
   - osx
 project_type_tags: []
