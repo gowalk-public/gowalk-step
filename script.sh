@@ -21,21 +21,16 @@ if [ ! -f "Podfile" ]; then
     echo "workspace '$BITRISE_PROJECT_PATH'" >Podfile
 fi
 
-# Replace CURRENT_PROJECT_VERSION
-sudo sed -i '' -e 's/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = '$BITRISE_BUILD_NUMBER';/' "$PROJECT"
-build_number=$(sed -n '/CURRENT_PROJECT_VERSION/{s/CURRENT_PROJECT_VERSION = //;s/;//;s/^[[:space:]]*//;p;q;}') "$PROJECT"
+update_project() {
+    sudo sed -i '' -e "$1" "$PROJECT" 2>&1 | grep -v "Permission denied"
+    value=$(sed -n "$2") "$PROJECT" 2>&1 | grep -v "Permission denied"
+    echo $value
+}
 
-# Replace MARKETING_VERSION
-sudo sed -i '' -e 's/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = '$BITRISE_VERSION_NUMBER';/' "$PROJECT"
-version_number=$(sed -n '/MARKETING_VERSION/{s/MARKETING_VERSION = //;s/;//;s/^[[:space:]]*//;p;q;}') "$PROJECT"
-
-# Replace CODE_SIGN_STYLE
-sudo sed -i '' -e 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Manual;/' "$PROJECT"
-code_sign_style=$(sed -n '/CODE_SIGN_STYLE/{s/CODE_SIGN_STYLE = //;s/;//;s/^[[:space:]]*//;p;q;}') "$PROJECT"
-
-# Replace DEVELOPMENT_TEAM
-sudo sed -i '' -e 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/' "$PROJECT"
-development_team=$(sed -n '/DEVELOPMENT_TEAM/{s/DEVELOPMENT_TEAM = //;s/;//;s/^[[:space:]]*//;p;q;}') "$PROJECT"
+build_number=$(update_project 's/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJECT_VERSION = '$BITRISE_BUILD_NUMBER';/' '/CURRENT_PROJECT_VERSION/{s/CURRENT_PROJECT_VERSION = //;s/;//;s/^[[:space:]]*//;p;q;}')
+version_number=$(update_project 's/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = '$BITRISE_VERSION_NUMBER';/' '/MARKETING_VERSION/{s/MARKETING_VERSION = //;s/;//;s/^[[:space:]]*//;p;q;}')
+code_sign_style=$(update_project 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Manual;/' '/CODE_SIGN_STYLE/{s/CODE_SIGN_STYLE = //;s/;//;s/^[[:space:]]*//;p;q;}')
+development_team=$(update_project 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/' '/DEVELOPMENT_TEAM/{s/DEVELOPMENT_TEAM = //;s/;//;s/^[[:space:]]*//;p;q;}')
 
 # Remove Package.resolved files
 sudo rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
