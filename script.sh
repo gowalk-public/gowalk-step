@@ -21,6 +21,7 @@ if [ ! -f "Podfile" ]; then
     echo "workspace '$BITRISE_PROJECT_PATH'" >Podfile
 fi
 
+# Function to update project values
 update_project() {
     sudo sed -i '' -e "$1" "$PROJECT" 2>&1 | grep -v "Permission denied"
     value=$(sed -n "$2") "$PROJECT" 2>&1 | grep -v "Permission denied"
@@ -35,3 +36,6 @@ development_team=$(update_project 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM 
 # Remove Package.resolved files
 sudo rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
 sudo rm -rf "./$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+
+# Explicit success exit code
+exit 0
