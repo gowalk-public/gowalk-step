@@ -4,6 +4,7 @@
 SUBDIR=$(dirname "$BITRISE_PROJECT_PATH")
 
 # Change to the BITRISE_SOURCE_DIR
+echo "$BITRISE_SOURCE_DIR"
 cd "$BITRISE_SOURCE_DIR"
 
 # Check if SUBDIR is not empty and is a directory
