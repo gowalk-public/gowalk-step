@@ -4,8 +4,6 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
-echo "$BITRISE_SOURCE_DIR"
-
 #import config
 source "${THIS_SCRIPT_DIR}/variables.sh"
 

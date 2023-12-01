@@ -4,18 +4,24 @@
 SUBDIR=$(dirname "$BITRISE_PROJECT_PATH")
 
 # Change to the BITRISE_SOURCE_DIR
-echo "$BITRISE_SOURCE_DIR"
 cd "$BITRISE_SOURCE_DIR"
+echo "Current Directory: $(pwd)"
 
 # Check if SUBDIR is not empty and is a directory
 if [[ -n "$SUBDIR" && -d "$SUBDIR" ]]; then
     # If SUBDIR exists, change to this directory
     cd "$SUBDIR"
+    echo "Changed to SUBDIR: $(pwd)"
 fi
 
 #Assign values for path
 PROJECT_DIR=$(ls | grep ".xcodeproj$" | head -n 1)
 PROJECT="./$PROJECT_DIR/project.pbxproj"
+echo "PROJECT_DIR: $PROJECT_DIR"
+echo "PROJECT: $PROJECT"
+
+# Log current directory contents
+echo "Directory Contents: $(ls -la)"
 
 # Check if Podfile exists, if not create an empty one
 if [ ! -f "Podfile" ]; then
