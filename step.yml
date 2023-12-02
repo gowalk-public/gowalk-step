@@ -1,5 +1,13 @@
 title: Gowalk Script
 summary: This is a custom Gowalk Script
+description: |-
+  What script will do:
+  - Update app version number from $APP_VERSION_NUMBER which set in Env Vars
+  - Update app build number from Bitrise build number
+  - Set CODE_SIGN_STYLE to Manual and DEVELOPMENT_TEAM to empty, to prevert any errors in next steps
+  - Remove Package.resolved (can be disabled from config)
+  - Remove Podfile.lock and Pods/ (can be disabled from config)
+  - Force to use always last version of Gowalk Helper SDK (can be disabled from config)
 website: https://gowalk.com
 source_code_url: https://github.com/gowalk-public/gowalk-step
 support_url: https://github.com/gowalk-public/gowalk-step/issues
@@ -32,6 +40,14 @@ inputs:
   opts:
     category: Config
     title: "Remove Podfile.lock before pod install?"
+    is_required: true
+    value_options:
+    - "no"
+    - "yes"
+- last_gowalk_helper: "yes"
+  opts:
+    category: Config
+    title: "Force to always use last version of Gowalk Helper?"
     is_required: true
     value_options:
     - "no"

@@ -42,6 +42,10 @@ fi
 # Remove Podfile.lock
 if [ "$remove_podsfile_lock" = "yes" ]; then
     sudo rm -rf "./Podfile.lock"
+elif [ "$last_gowalk_helper" = "yes" ]; then
+# Force to use last Gowalk Helper
+    pod install
+    pod update GowalkDevHelper
 fi
 
 # Remove Pods
