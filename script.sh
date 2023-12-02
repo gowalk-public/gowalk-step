@@ -18,7 +18,7 @@ PROJECT="./$PROJECT_DIR/project.pbxproj"
 
 # Function to update project values
 update_project() {
-    sudo sed -i '' -e "$1" "$PROJECT" 2>&1 | grep -v "Permission denied"
+    sed -i '' -e "$1" "$PROJECT" 2>&1 | grep -v "Permission denied"
     value=$(sed -n "$2") "$PROJECT" 2>&1 | grep -v "Permission denied"
     echo $value
 }
@@ -30,24 +30,26 @@ development_team=$(update_project 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM 
 
 # Remove Package.resolved files
 if [ "$remove_package_resolved" = "yes" ]; then
-    sudo rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
-    sudo rm -rf "./$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
+    rm -rf "./$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
+    rm -rf "./$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
 fi
 
 # Remove Podfile.lock
 if [ "$remove_podsfile_lock" = "yes" ]; then
-    sudo rm -rf "./Podfile.lock"
+    rm -rf "./Podfile.lock"
 elif [ "$last_gowalk_helper" = "yes" ]; then
 # Force to use last Gowalk Helper
     if [ -f "Podfile" ]; then
-        pod install
-        pod update GowalkDevHelper
+        if grep -q "GowalkDevHelper" "Podfile"; then
+            pod install
+            pod update GowalkDevHelper
+        fi
     fi
 fi
 
 # Remove Pods
 if [ "$remove_pods" = "yes" ]; then
-    sudo rm -rf "./Pods/"
+    rm -rf "./Pods/"
 fi
 
 # Check if Podfile exists, if not create an empty one
