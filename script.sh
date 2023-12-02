@@ -16,11 +16,6 @@ fi
 PROJECT_DIR=$(ls | grep ".xcodeproj$" | head -n 1)
 PROJECT="./$PROJECT_DIR/project.pbxproj"
 
-# Check if Podfile exists, if not create an empty one
-if [ ! -f "Podfile" ]; then
-    echo "workspace '$BITRISE_PROJECT_PATH'" >Podfile
-fi
-
 # Function to update project values
 update_project() {
     sudo sed -i '' -e "$1" "$PROJECT" 2>&1 | grep -v "Permission denied"
@@ -44,11 +39,18 @@ if [ "$remove_podsfile_lock" = "yes" ]; then
     sudo rm -rf "./Podfile.lock"
 elif [ "$last_gowalk_helper" = "yes" ]; then
 # Force to use last Gowalk Helper
-    pod install
-    pod update GowalkDevHelper
+    if [ -f "Podfile" ]; then
+        pod install
+        pod update GowalkDevHelper
+    fi
 fi
 
 # Remove Pods
 if [ "$remove_pods" = "yes" ]; then
     sudo rm -rf "./Pods/"
+fi
+
+# Check if Podfile exists, if not create an empty one
+if [ ! -f "Podfile" ]; then
+    echo "workspace '$BITRISE_PROJECT_PATH'" >Podfile
 fi
