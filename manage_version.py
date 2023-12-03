@@ -4,6 +4,7 @@ import time
 import os
 import json
 
+
 def load_env_variables():
     return {
         "APP_ID": os.environ.get('APP_ID'),
@@ -48,11 +49,15 @@ def get_latest_app_version(app_id, jwt_token):
         # Find the version with the latest createdDate
         latest_version = max(versions, key=lambda x: x['attributes']['createdDate'], default=None)
         if latest_version:
-            return latest_version['attributes']
+            return {
+                'versionString': latest_version['attributes']['versionString'],
+                'appStoreVersionId': latest_version['id'],  # Corrected extraction of the ID
+                'appStoreState': latest_version['attributes']['appStoreState']  # Extracting the state here if needed
+            }
         else:
-            return "No versions found."
+            return {"versionString": None, "appStoreVersionId": None}
     else:
-        return f"Request failed with status code: {response.status_code}"
+        return {"versionString": None, "appStoreVersionId": None, "error": f"Request failed with status code: {response.status_code}"}
 
 def calculate_next_version(current_version):
     parts = [int(p) for p in current_version.split('.')]
@@ -103,6 +108,7 @@ def main():
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
     app_store_state = latest_version_attributes.get('appStoreState')
+    current_version_id = latest_version_attributes.get('appStoreVersionId')
     current_version = latest_version_attributes.get('versionString')
 
     eligible_states = [
@@ -113,12 +119,14 @@ def main():
         'PREORDER_READY_FOR_SALE'
     ]
 
-    if app_store_state in eligible_states:
+    if app_store_state in eligible_states and os.getenv('CREATE_NEW_VERSION') == 'yes':
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
-        result = {'APP_VERSION': new_version}
+        new_version_id = response.get('data', {}).get('id')
+        new_app_store_state = response.get('data', {}).get('appStoreState')
+        result = {'APP_VERSION': new_version, 'APP_VERSION_ID': new_version_id, 'APP_STATUS': new_app_store_state}
     else:
-        result = {'APP_VERSION': current_version}
+        result = {'APP_VERSION': current_version, 'APP_VERSION_ID': current_version_id, 'APP_STATUS': app_store_state}
     print(json.dumps(result))
 
 if __name__ == "__main__":

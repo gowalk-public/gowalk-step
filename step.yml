@@ -52,3 +52,19 @@ inputs:
     value_options:
     - "no"
     - "yes"
+- create_new_version: "yes"
+  opts:
+    category: Config
+    title: "Do you want create new version in AppStore?"
+    is_required: true
+    value_options:
+    - "no"
+    - "yes"
+- update_whats_new: "yes"
+  opts:
+    category: Config
+    title: "Do you want update What's new text for app version in AppStore?"
+    is_required: true
+    value_options:
+    - "no"
+    - "yes"
