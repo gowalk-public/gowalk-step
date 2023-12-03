@@ -13,9 +13,11 @@ is_debug="no"
 echo "is_debug: $is_debug"
 
 SUBDIR=$(dirname "$BITRISE_PROJECT_PATH")
+if [ "$SUBDIR" = "." ]; then
+    SUBDIR=""
+fi
 echo "SUBDIR: $SUBDIR"
 
-# Build app working directory
 if [[ -n "$SUBDIR" && -d "$SUBDIR" ]]; then    
     APP_WORKING_DIR="$BITRISE_SOURCE_DIR/$SUBDIR"
 else
