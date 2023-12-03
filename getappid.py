@@ -2,6 +2,7 @@ import os
 import requests
 import jwt
 import time
+import json
 
 # Accessing the bundle_identifier environment variable
 bundle_id = os.environ.get('PRODUCT_BUNDLE_IDENTIFIER')
@@ -38,8 +39,6 @@ for app in response_json['data']:  # Access data in the JSON object
         break
 
 if app_id:
-    # Set APP_ID environment variable
-    os.environ['APP_ID'] = app_id
-    print(f"APP_ID set to {app_id}")
-else:
-    print("No matching app found.")
+    # Output APP_ID as JSON
+    result = {'APP_ID': app_id}
+    print(json.dumps(result))

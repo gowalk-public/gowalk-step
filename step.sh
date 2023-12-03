@@ -25,7 +25,7 @@ source "${THIS_SCRIPT_DIR}/appstore_creds.sh"
 source "${THIS_SCRIPT_DIR}/get_bundleid.sh"
 
 #function to get app id from AppStoreConnect API
-python3 "${THIS_SCRIPT_DIR}/getappid.py"
+export APP_ID=$(echo "$(python3 "${THIS_SCRIPT_DIR}/getappid.py")" | jq -r '.APP_ID')
 echo "APP ID IS: $APP_ID"
 
 #function to create app at AppStoreConnect API if app id not found
