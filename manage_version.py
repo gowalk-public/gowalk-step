@@ -44,9 +44,6 @@ if app_id:
 else:
     print("No matching app found.")
 
-print(f"{app_id}")
-
-
 def load_env_variables():
     return {
         "APP_ID": os.environ.get('APP_ID'),
@@ -144,6 +141,7 @@ def main():
     env_vars = load_env_variables()
     jwt_token = generate_jwt_token(env_vars['ISSUER_ID'], env_vars['KEY_ID'], env_vars['PRIVATE_KEY'])
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
+    print(f"APP_ID: {env_vars['APP_ID']}")
 
     if isinstance(latest_version_attributes, dict):
         print(f"Latest Version String: {latest_version_attributes.get('versionString')}")
