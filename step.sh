@@ -36,4 +36,5 @@ python3 "${THIS_SCRIPT_DIR}/manage_version.py"
 #function to update What's New field in AppStoreConnect
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/update_whatsnew.py")
 
+script_result=$?
 exit ${script_result}
