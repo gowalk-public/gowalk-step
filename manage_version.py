@@ -2,6 +2,9 @@ import requests
 import jwt
 import time
 import os
+import logging
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def load_env_variables():
     return {
@@ -94,6 +97,7 @@ def create_app_store_version(app_id, version_string, jwt_token):
         }
     }
     response = requests.post(url, json=payload, headers=headers)
+    logging.debug(f"Create Version Response Content: {response.text}")
     return response.json()
 
 def main():
