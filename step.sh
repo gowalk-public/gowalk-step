@@ -6,7 +6,7 @@ CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
 #Install Python packages from requirements
 echo "Installing Python packages from requirements.txt..."
-pip3 install -r requirements.txt
+pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt"
 echo "Installation complete."
 
 #config
