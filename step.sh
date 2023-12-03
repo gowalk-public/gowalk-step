@@ -13,6 +13,12 @@ content=$(<"${THIS_SCRIPT_DIR}/change_version.sh")
 #import functions to manipulate with Pods and Packages
 content=$(<"${THIS_SCRIPT_DIR}/pods_packages.sh")
 
+#import function to get credentials for AppStoreConnect API
+content=$(<"${THIS_SCRIPT_DIR}/appstore_creds.sh")
+
+#import function to manage app version in AppStoreConnect
+#content=$(<"${THIS_SCRIPT_DIR}/manage_version_appstoreconnect.sh")
+
 if [ -z "${content}" ] ; then
 	echo " [!] => Failed: No script (content) defined for execution!"
 	exit 1
