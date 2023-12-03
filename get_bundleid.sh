@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 
 # Run xcodebuild and capture output
-output=$(xcodebuild "-project" "$PROJECT_DIR" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
-echo "COMMAND XCODEBULD IS: $output"
+output=$(xcodebuild "-project" "$PROJECT" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
 
 # Find the line containing PRODUCT_BUNDLE_IDENTIFIER and extract its value
 bundle_identifier=$(echo "$output" | grep PRODUCT_BUNDLE_IDENTIFIER | cut -d '=' -f2 | xargs)
