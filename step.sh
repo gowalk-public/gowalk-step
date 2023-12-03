@@ -4,20 +4,32 @@ THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
-#import config
+#config
 source "${THIS_SCRIPT_DIR}/variables.sh"
 
-#import functions to change app version and build
+#functions to change app version and build
 content=$(<"${THIS_SCRIPT_DIR}/change_version.sh")
 
-#import functions to manipulate with Pods and Packages
-content=$(<"${THIS_SCRIPT_DIR}/pods_packages.sh")
+#functions to manipulate with Pods and Packages
+content+=$(<"${THIS_SCRIPT_DIR}/pods_packages.sh")
 
-#import function to get credentials for AppStoreConnect API
-content=$(<"${THIS_SCRIPT_DIR}/appstore_creds.sh")
+#function to get credentials for AppStoreConnect API
+content+=$(<"${THIS_SCRIPT_DIR}/appstore_creds.sh")
 
-#import function to manage app version in AppStoreConnect
-#content=$(<"${THIS_SCRIPT_DIR}/manage_version_appstoreconnect.sh")
+#function to get budnle id from Xcode project
+content+=$(<"${THIS_SCRIPT_DIR}/get_bundleid.sh")
+
+#function to get app id from AppStoreConnect API
+content+=$(python3 "${THIS_SCRIPT_DIR}/getappid.py")
+
+#function to create app at AppStoreConnect API if app id not found
+#python3 content+=$(python3 "${THIS_SCRIPT_DIR}/create_app.py")
+
+#function to manage app version in AppStoreConnect
+content+=$(python3 "${THIS_SCRIPT_DIR}/manage_version.py")
+
+#function to update What's New field in AppStoreConnect
+#python3 content+=$(python3 "${THIS_SCRIPT_DIR}/update_whatsnew.py")
 
 if [ -z "${content}" ] ; then
 	echo " [!] => Failed: No script (content) defined for execution!"

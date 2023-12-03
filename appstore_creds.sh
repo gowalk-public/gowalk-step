@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Check if jq is installed, if not, install it using Homebrew
 if ! command -v jq &> /dev/null
