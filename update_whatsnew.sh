@@ -2,6 +2,7 @@
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
+rm -rf "./fastlane"
 mkdir "./fastlane"
 
 cat << EOF > "./fastlane/changelog.txt"
@@ -22,4 +23,4 @@ cat << EOF > "./fastlane/key.json"
 }
 EOF
 
-fastlane run set_changelog api_key_path:"${THIS_SCRIPT_DIR}/fastlane/key.json" version:"$APP_VERSION" app_identifier:"$PRODUCT_BUNDLE_IDENTIFIER"
+fastlane run set_changelog api_key_path:"./fastlane/key.json" version:"$APP_VERSION" app_identifier:"$PRODUCT_BUNDLE_IDENTIFIER"
