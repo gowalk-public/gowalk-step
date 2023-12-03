@@ -25,13 +25,14 @@ source "${THIS_SCRIPT_DIR}/appstore_creds.sh"
 source "${THIS_SCRIPT_DIR}/get_bundleid.sh"
 
 #function to get app id from AppStoreConnect API
-#python3 "${THIS_SCRIPT_DIR}/getappid.py"
+python3 "${THIS_SCRIPT_DIR}/getappid.py"
+echo "APP ID IS: $APP_ID"
 
 #function to create app at AppStoreConnect API if app id not found
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/create_app.py")
 
 #function to manage app version in AppStoreConnect
-python3 "${THIS_SCRIPT_DIR}/manage_version.py"
+#python3 "${THIS_SCRIPT_DIR}/manage_version.py"
 
 #function to update What's New field in AppStoreConnect
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/update_whatsnew.py")
