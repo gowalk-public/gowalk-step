@@ -2,6 +2,7 @@ import requests
 import jwt
 import time
 import os
+import json
 
 def load_env_variables():
     return {
@@ -122,9 +123,10 @@ def main():
     if app_store_state in eligible_states:
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
-        print(f"New version created: {new_version}")
+        result = {'APP_VERSION': new_version}
     else:
-        print(f"Current version remains: {current_version}")
+        result = {'APP_VERSION': current_version}
+    print(json.dumps(result))
 
 if __name__ == "__main__":
     main()

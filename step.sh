@@ -26,13 +26,15 @@ source "${THIS_SCRIPT_DIR}/get_bundleid.sh"
 
 #function to get app id from AppStoreConnect API
 export APP_ID=$(echo "$(python3 "${THIS_SCRIPT_DIR}/getappid.py")" | jq -r '.APP_ID')
-echo "APP ID IS: $APP_ID"
 
 #function to create app at AppStoreConnect API if app id not found
-#python3 content+=$(python3 "${THIS_SCRIPT_DIR}/create_app.py")
+#if [ "$APP_ID" -eq 0 ]; then
+	#python3 content+=$(python3 "${THIS_SCRIPT_DIR}/create_app.py")
+#fi
 
 #function to manage app version in AppStoreConnect
-#python3 "${THIS_SCRIPT_DIR}/manage_version.py"
+export APP_VERSION=$(echo "$(python3 "${THIS_SCRIPT_DIR}/manage_version.py")" | jq -r '.APP_VERSION')
+echo "APP VERSION IS $APP_VERSION"
 
 #function to update What's New field in AppStoreConnect
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/update_whatsnew.py")

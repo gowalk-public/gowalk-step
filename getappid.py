@@ -41,4 +41,6 @@ for app in response_json['data']:  # Access data in the JSON object
 if app_id:
     # Output APP_ID as JSON
     result = {'APP_ID': app_id}
-    print(json.dumps(result))
+else:
+    result = {'APP_ID': 0}
+print(json.dumps(result))
