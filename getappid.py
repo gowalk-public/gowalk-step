@@ -3,7 +3,6 @@ import requests
 import jwt
 import time
 
-
 # Accessing the bundle_identifier environment variable
 bundle_id = os.environ.get('PRODUCT_BUNDLE_IDENTIFIER')
 key_id = os.environ.get('APPLE_KEY_ID')
