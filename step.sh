@@ -25,7 +25,7 @@ source "${THIS_SCRIPT_DIR}/appstore_creds.sh"
 source "${THIS_SCRIPT_DIR}/get_bundleid.sh"
 
 #function to get app id from AppStoreConnect API
-python3 "${THIS_SCRIPT_DIR}/getappid.py"
+#python3 "${THIS_SCRIPT_DIR}/getappid.py"
 
 #function to create app at AppStoreConnect API if app id not found
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/create_app.py")
