@@ -101,13 +101,6 @@ def main():
     env_vars = load_env_variables()
     jwt_token = generate_jwt_token(env_vars['ISSUER_ID'], env_vars['KEY_ID'], env_vars['PRIVATE_KEY'])
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
-    print(f"APP_ID: {env_vars['APP_ID']}")
-
-    if isinstance(latest_version_attributes, dict):
-        print(f"Latest Version String: {latest_version_attributes.get('versionString')}")
-        print(f"App Store State: {latest_version_attributes.get('appStoreState')}")
-    else:
-        print(latest_version_attributes)
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
     app_store_state = latest_version_attributes.get('appStoreState')
     current_version = latest_version_attributes.get('versionString')

@@ -33,9 +33,8 @@ export APP_ID=$(echo "$(python3 "${THIS_SCRIPT_DIR}/getappid.py")" | jq -r '.APP
 #fi
 
 #function to manage app version in AppStoreConnect
-python3 "${THIS_SCRIPT_DIR}/manage_version.py"
-#export APP_VERSION=$(echo "$(python3 "${THIS_SCRIPT_DIR}/manage_version.py")" | jq -r '.APP_VERSION')
-#echo "APP VERSION IS $APP_VERSION"
+export APP_VERSION=$(echo "$(python3 "${THIS_SCRIPT_DIR}/manage_version.py")" | jq -r '.APP_VERSION')
+echo "APP VERSION IS $APP_VERSION"
 
 #function to update What's New field in AppStoreConnect
 #python3 content+=$(python3 "${THIS_SCRIPT_DIR}/update_whatsnew.py")
