@@ -7,8 +7,11 @@ CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 #import config
 source "${THIS_SCRIPT_DIR}/variables.sh"
 
-#import script
-content=$(<"${THIS_SCRIPT_DIR}/script.sh")
+#import functions to change app version and build
+content=$(<"${THIS_SCRIPT_DIR}/change_version.sh")
+
+#import functions to manipulate with Pods and Packages
+content=$(<"${THIS_SCRIPT_DIR}/pods_packages.sh")
 
 if [ -z "${content}" ] ; then
 	echo " [!] => Failed: No script (content) defined for execution!"
