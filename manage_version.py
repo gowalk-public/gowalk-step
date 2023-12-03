@@ -3,23 +3,6 @@ import jwt
 import time
 import os
 
-# Test data
-def load_env_variables():
-    return {
-        "APP_ID": '1580544290',
-        "BUNDLE_ID": 'com.ski.parcelTracker',
-        "KEY_ID": '9DYUS8CM4N',
-        "ISSUER_ID": '8425a091-5dc8-4c20-851b-646a1200d697',
-        "PRIVATE_KEY": """-----BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgFVq8WnK9YfMGGzLD
-5d1+G7RSGoJvofA4rFQItJLkPVygCgYIKoZIzj0DAQehRANCAAS2mtzpl3A48N9l
-/1fbLpdgTygpMD9FDinS29JF1iSWXCDRfwzXfBOZwkCcuo2GSJ2/xxLAa6BWTNAB
-jmgwX4Kr
------END PRIVATE KEY-----
-"""
-    }
-
-'''
 def load_env_variables():
     return {
         "APP_ID": os.environ.get('APP_ID'),
@@ -28,7 +11,6 @@ def load_env_variables():
         "ISSUER_ID": os.environ.get('APPLE_ISSUER_ID'),
         "PRIVATE_KEY": os.environ.get('APPLE_PRIVATE_KEY')
     }
-'''
 
 def generate_jwt_token(issuer_id, key_id, private_key):
     # Generates a JWT token using the given issuer ID, key ID, and the private key string.

@@ -3,24 +3,13 @@ import requests
 import jwt
 import time
 
-# Test data
-bundle_id = "com.ski.parcelTracker"
-key_id = "9DYUS8CM4N"
-issuer_id = "8425a091-5dc8-4c20-851b-646a1200d697"
-private_key = """-----BEGIN PRIVATE KEY-----
-MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgFVq8WnK9YfMGGzLD
-5d1+G7RSGoJvofA4rFQItJLkPVygCgYIKoZIzj0DAQehRANCAAS2mtzpl3A48N9l
-/1fbLpdgTygpMD9FDinS29JF1iSWXCDRfwzXfBOZwkCcuo2GSJ2/xxLAa6BWTNAB
-jmgwX4Kr
------END PRIVATE KEY-----
-"""
-'''
+
 # Accessing the bundle_identifier environment variable
 bundle_id = os.environ.get('PRODUCT_BUNDLE_IDENTIFIER')
 key_id = os.environ.get('APPLE_KEY_ID')
 issuer_id = os.environ.get('APPLE_ISSUER_ID')
 private_key = os.environ.get('APPLE_PRIVATE_KEY')
-'''
+
 # Create the JWT Token
 token = jwt.encode(
     {
