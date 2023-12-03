@@ -28,5 +28,8 @@ echo "APP_WORKING_DIR: $APP_WORKING_DIR"
 export PROJECT_DIR=$(ls "$APP_WORKING_DIR" | grep ".xcodeproj$" | head -n 1)
 echo "PROJECT_DIR: $PROJECT_DIR"
 
+export PROJECT_FILE="$APP_WORKING_DIR/$PROJECT_DIR"
+echo "PROJECT FILE: $PROJECT_FILE"
+
 export PROJECT="$APP_WORKING_DIR/$PROJECT_DIR/project.pbxproj"
 echo "PROJECT: $PROJECT"
