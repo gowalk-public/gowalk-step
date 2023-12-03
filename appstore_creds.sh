@@ -27,8 +27,3 @@ private_key=$(echo "$json_response" | jq -r '.private_key')
 export APPLE_KEY_ID=$key_id
 export APPLE_ISSUER_ID=$issuer_id
 export APPLE_PRIVATE_KEY="$private_key"
-
-# Optionally, you can print the variables for debugging
-echo "Key ID: $APPLE_KEY_ID"
-echo "Issuer ID: $APPLE_ISSUER_ID"
-echo "Private Key: $APPLE_PRIVATE_KEY"
