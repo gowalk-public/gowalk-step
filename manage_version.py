@@ -120,12 +120,14 @@ def main():
     ]
 
     if app_store_state in eligible_states and os.getenv('CREATE_NEW_VERSION') == 'yes':
+        print('CREATE VERSION')
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
         new_app_store_state = response.get('data', {}).get('appStoreState')
         result = {'APP_VERSION': new_version, 'APP_VERSION_ID': new_version_id, 'APP_STATUS': new_app_store_state}
     else:
+        print('NOT CREATE VERSION')
         result = {'APP_VERSION': current_version, 'APP_VERSION_ID': current_version_id, 'APP_STATUS': app_store_state}
     print(json.dumps(result))
 
