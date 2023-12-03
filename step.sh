@@ -12,9 +12,6 @@ echo "Installation complete."
 #config
 source "${THIS_SCRIPT_DIR}/variables.sh"
 
-#functions to change app version and build
-source "${THIS_SCRIPT_DIR}/change_version.sh"
-
 #functions to manipulate with Pods and Packages
 source "${THIS_SCRIPT_DIR}/pods_packages.sh"
 
@@ -40,6 +37,9 @@ export APP_STATUS=$(echo "$manage_version" | jq -r '.APP_STATUS')
 echo "APP STATUS IS $APP_STATUS"
 echo "APP VERSION IS $APP_VERSION"
 echo "APP VERSION ID IS $APP_VERSION_ID"
+
+#functions to change app version and build in xcode project
+source "${THIS_SCRIPT_DIR}/change_version.sh"
 
 #function to update What's New field in AppStoreConnect
 if [ "$update_whats_new" = "yes" ]; then

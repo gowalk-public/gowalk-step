@@ -2,8 +2,17 @@
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
-# Define the content of the key.json file
-cat << EOF > "${THIS_SCRIPT_DIR}/fastlane/key.json"
+mkdir "./fastlane"
+
+cat << EOF > "./fastlane/changelog.txt"
+- Improved Performance: Faster, smoother app experience
+- New Functionalities: Intuitive and user-friendly
+- Refreshed Design: Enhanced user interface
+- Bug Fixes: Minor issues resolved for seamless use
+- Enhanced Security: Updated to protect your data
+EOF
+
+cat << EOF > "./fastlane/key.json"
 {
   "key_id": "$APPLE_KEY_ID",
   "issuer_id": "$APPLE_ISSUER_ID",
