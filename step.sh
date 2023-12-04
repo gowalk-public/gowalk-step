@@ -43,5 +43,8 @@ source "${THIS_SCRIPT_DIR}/change_version.sh"
 #    source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
 #fi
 
+#support old logic and open Subdir if exists
+cd $SUBDIR
+
 script_result=$?
 exit ${script_result}

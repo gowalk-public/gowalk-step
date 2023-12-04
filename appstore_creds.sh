@@ -27,3 +27,7 @@ private_key=$(echo "$json_response" | jq -r '.private_key')
 export APPLE_KEY_ID=$key_id
 export APPLE_ISSUER_ID=$issuer_id
 export APPLE_PRIVATE_KEY="$private_key"
+
+#echo "APPLE_KEY_ID: $key_id"
+#echo "APPLE_ISSUER_ID: $issuer_id"
+#echo "APPLE_PRIVATE_KEY: $APPLE_PRIVATE_KEY"
