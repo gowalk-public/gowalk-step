@@ -25,6 +25,6 @@ if [ "$remove_pods" = "yes" ]; then
 fi
 
 # Check if Podfile exists, if not create an empty one
-if [ ! -f "Podfile" ]; then
-    echo "workspace '$BITRISE_PROJECT_PATH'" >Podfile
+if [ ! -f "$APP_WORKING_DIR/Podfile" ]; then
+    echo "workspace '$BITRISE_PROJECT_PATH'" >"$APP_WORKING_DIR/Podfile"
 fi
