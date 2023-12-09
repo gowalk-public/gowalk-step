@@ -31,9 +31,6 @@ export APP_VERSION=$(echo "$manage_version" | jq -r '.APP_VERSION')
 export APP_VERSION_ID=$(echo "$manage_version" | jq -r '.APP_VERSION_ID')
 export APP_STATUS=$(echo "$manage_version" | jq -r '.APP_STATUS')
 
-#TMP DELETE AFTER
-export APP_VERSION=$APP_VERSION_NUMBER
-
 #functions to change app version and build in xcode project
 source "${THIS_SCRIPT_DIR}/change_version.sh"
 
@@ -41,6 +38,9 @@ source "${THIS_SCRIPT_DIR}/change_version.sh"
 if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ]; then
     source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
 fi
+
+#check rating and skip if needed
+#dsym upload
 
 script_result=$?
 exit ${script_result}
