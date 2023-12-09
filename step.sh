@@ -39,8 +39,13 @@ if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION"
     source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
 fi
 
-#check rating and skip if needed
-#dsym upload
+#dsym upload preparing
+source "${THIS_SCRIPT_DIR}/crashlytics_prepare.sh"
+
+#check app rating
+check_rating=$(python3 "${THIS_SCRIPT_DIR}/check_rating.py")
+export APP_RATING=$(echo "$check_rating" | jq -r '.APP_RATING')
+echo "App Rating in US Store is: $APP_RATING"
 
 script_result=$?
 exit ${script_result}
