@@ -3,7 +3,7 @@ import jwt
 import time
 import os
 import json
-
+from packaging.version import parse
 
 def load_env_variables():
     return {
@@ -41,7 +41,8 @@ def get_latest_app_version(app_id, jwt_token):
 
     # Make the GET request
     response = requests.get(url, headers=headers)
-
+    #Comment debug print below for production
+    #print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
@@ -60,20 +61,25 @@ def get_latest_app_version(app_id, jwt_token):
         return {"versionString": None, "appStoreVersionId": None, "error": f"Request failed with status code: {response.status_code}"}
 
 def calculate_next_version(current_version):
-    parts = [int(p) for p in current_version.split('.')]
-    while len(parts) < 3:
-        parts.append(0)
+    version = parse(current_version)
+    
+    # Increment the micro version
+    new_micro = version.micro + 1
+    new_minor = version.minor
+    new_major = version.major
 
-    parts[-1] += 1
-    for i in range(len(parts) - 1, 0, -1):
-        if parts[i] > 9:
-            parts[i] = 0
-            parts[i - 1] += 1
+    # Check if micro version needs to reset and minor needs to increment
+    if new_micro >= 10:
+        new_micro = 0
+        new_minor = version.minor + 1
 
-    if parts[0] == 0:
-        parts[0] = 1
+    # Check if minor version needs to reset and major needs to increment
+    if new_minor >= 10:
+        new_minor = 0
+        new_micro = 0
+        new_major = version.major + 1
 
-    return '.'.join(map(str, parts))
+    return f"{new_major}.{new_minor}.{new_micro}"
 
 def create_app_store_version(app_id, version_string, jwt_token):
     url = "https://api.appstoreconnect.apple.com/v1/appStoreVersions"
@@ -100,26 +106,22 @@ def create_app_store_version(app_id, version_string, jwt_token):
         }
     }
     response = requests.post(url, json=payload, headers=headers)
+    #Comment debug print below for production
+    #print(f"The create_app_store_version response is: {response.json()}")
     return response.json()
 
 def main():
     env_vars = load_env_variables()
     jwt_token = generate_jwt_token(env_vars['ISSUER_ID'], env_vars['KEY_ID'], env_vars['PRIVATE_KEY'])
     latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
-    latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
     app_store_state = latest_version_attributes.get('appStoreState')
     current_version_id = latest_version_attributes.get('appStoreVersionId')
     current_version = latest_version_attributes.get('versionString')
 
-    eligible_states = [
-        'REMOVED_FROM_SALE',
-        'READY_FOR_SALE',
-        'PENDING_DEVELOPER_RELEASE',
-        'PENDING_APPLE_RELEASE',
-        'PREORDER_READY_FOR_SALE'
-    ]
-
-    if app_store_state in eligible_states and os.getenv('CREATE_NEW_VERSION') == 'yes':
+    if app_store_state == 'PENDING_DEVELOPER_RELEASE':
+        print("Error: App is Pending Developer Release. Publish it in AppStore when try again")
+        return
+    elif app_store_state == 'READY_FOR_SALE' and os.getenv('CREATE_NEW_VERSION') == 'yes':
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
@@ -128,6 +130,5 @@ def main():
     else:
         result = {'APP_VERSION': current_version, 'APP_VERSION_ID': current_version_id, 'APP_STATUS': app_store_state}
     print(json.dumps(result))
-
 if __name__ == "__main__":
     main()
