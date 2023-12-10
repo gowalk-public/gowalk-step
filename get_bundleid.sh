@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
-output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
-[ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used this command:"
-[ "$is_debug" = "yes" ] && echo 'xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings"'
+
+BITRISE_TARGET
+
+if [ -z "${BITRISE_TARGET}" ]; then
+    output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_TARGET" "-configuration" "Release" "-showBuildSettings")
+    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used this command:"
+    [ "$is_debug" = "yes" ] && echo 'xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings"'
+else
+    output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
+    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used this command:"
+    [ "$is_debug" = "yes" ] && echo 'xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings"'
+fi
 
 # Find the line containing PRODUCT_BUNDLE_IDENTIFIER and extract its value
 bundle_identifier=$(echo "$output" | grep PRODUCT_BUNDLE_IDENTIFIER | cut -d '=' -f2 | xargs)
