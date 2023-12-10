@@ -68,3 +68,11 @@ inputs:
     value_options:
     - "no"
     - "yes"
+- is_debug: "0"
+  opts:
+    category: Config
+    title: "Enable debug mode if you need see script logs. 1 - enabled, 0 - disabled"
+    is_required: true
+    value_options:
+    - "0"
+    - "1"

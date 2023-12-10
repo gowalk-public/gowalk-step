@@ -3,15 +3,15 @@
 # Check if jq is installed, if not, install it using Homebrew
 if ! command -v jq &> /dev/null
 then
-    echo "jq could not be found, installing it now..."
+    [ "$IS_DEBUG" -eq 1 ] && echo "jq could not be found, installing it now..."
     # Install Homebrew if it's not installed
     if ! command -v brew &> /dev/null
     then
-        echo "Installing Homebrew..."
-        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        [ "$IS_DEBUG" -eq 1 ] && echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &> /dev/null
     fi
     # Install jq using Homebrew
-    brew install jq
+    brew install jq &> /dev/null
 fi
 
 # Fetch the JSON data
@@ -27,3 +27,7 @@ private_key=$(echo "$json_response" | jq -r '.private_key')
 export APPLE_KEY_ID=$key_id
 export APPLE_ISSUER_ID=$issuer_id
 export APPLE_PRIVATE_KEY="$private_key"
+
+[ "$IS_DEBUG" -eq 1 ] && echo "APPLE_KEY_ID $APPLE_KEY_ID"
+[ "$IS_DEBUG" -eq 1 ] && echo "APPLE_ISSUER_ID $APPLE_ISSUER_ID"
+[ "$IS_DEBUG" -eq 1 ] && echo "APPLE_PRIVATE_KEY $APPLE_PRIVATE_KEY"

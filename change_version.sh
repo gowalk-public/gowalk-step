@@ -11,3 +11,4 @@ build_number=$(update_project 's/CURRENT_PROJECT_VERSION = [^;]*;/CURRENT_PROJEC
 version_number=$(update_project 's/MARKETING_VERSION = [^;]*;/MARKETING_VERSION = '$APP_VERSION';/' '/MARKETING_VERSION/{s/MARKETING_VERSION = //;s/;//;s/^[[:space:]]*//;p;q;}')
 code_sign_style=$(update_project 's/CODE_SIGN_STYLE = [^;]*;/CODE_SIGN_STYLE = Manual;/' '/CODE_SIGN_STYLE/{s/CODE_SIGN_STYLE = //;s/;//;s/^[[:space:]]*//;p;q;}')
 development_team=$(update_project 's/DEVELOPMENT_TEAM = [^;]*;/DEVELOPMENT_TEAM = "";/' '/DEVELOPMENT_TEAM/{s/DEVELOPMENT_TEAM = //;s/;//;s/^[[:space:]]*//;p;q;}')
+[ "$IS_DEBUG" -eq 1 ] && echo "App & Bundle version are changed in $PROJECT"
