@@ -11,7 +11,7 @@ def get_app_rating(app_id):
     url = f'https://apps.apple.com/us/app/id{app_id}'
 
     # Send a request to the URL
-    response = requests.get(url)
+    response = requests.get(url, allow_redirects=True, timeout=30)
 
     # Check if the request was successful
     if response.status_code != 200:
@@ -31,7 +31,7 @@ def get_app_rating(app_id):
     json_data = json.loads(script_tag.string)
 
     # Extract the rating value
-    rating_value = json_data.get('aggregateRating', {}).get('ratingValue', 'No rating')
+    rating_value = json_data.get('aggregateRating', {}).get('ratingValue', '0')
 
     # Return the rating
     return {'APP_RATING': rating_value}
