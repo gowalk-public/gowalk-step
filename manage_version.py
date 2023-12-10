@@ -49,6 +49,7 @@ def get_latest_app_version(app_id, jwt_token):
     response = requests.get(url, headers=headers)
     # Comment if not debug
     #print(f"The get_latest_app_version response is: {response.json()}")
+    print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
