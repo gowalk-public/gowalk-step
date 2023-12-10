@@ -38,7 +38,7 @@ def get_app_rating(app_id):
 
 if __name__ == "__main__":
     result = get_app_rating(os.environ.get('APP_ID'))
-    print(result)
+    print(json.dumps(result))
 
     # Create an empty file named "App_Rating_{rating_value}.txt" in the BITRISE_DEPLOY_DIR
     rating_value = result.get('APP_RATING')

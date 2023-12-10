@@ -41,8 +41,8 @@ def get_latest_app_version(app_id, jwt_token):
 
     # Make the GET request
     response = requests.get(url, headers=headers)
-    #Comment debug print below for production
-    #print(f"The get_latest_app_version response is: {response.json()}")
+    if os.getenv('IS_DEBUG') == 'yes':
+        print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
@@ -106,8 +106,8 @@ def create_app_store_version(app_id, version_string, jwt_token):
         }
     }
     response = requests.post(url, json=payload, headers=headers)
-    #Comment debug print below for production
-    #print(f"The create_app_store_version response is: {response.json()}")
+    if os.getenv('IS_DEBUG') == 'yes':
+        print(f"The create_app_store_version response is: {response.json()}")
     return response.json()
 
 def main():

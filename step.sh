@@ -31,6 +31,15 @@ export APP_ID=$(echo "$getappid" | jq -r '.APP_ID')
 [ "$is_debug" = "yes" ] && echo "Result of getappid.py: $getappid"
 [ "$is_debug" = "yes" ] && echo "APP_ID: $APP_ID"
 
+#dsym upload preparing
+source "${THIS_SCRIPT_DIR}/crashlytics_prepare.sh"
+
+#check app rating
+check_rating=$(python3 "${THIS_SCRIPT_DIR}/check_rating.py")
+export APP_RATING=$(echo "$check_rating" | jq -r '.APP_RATING')
+[ "$is_debug" = "yes" ] && echo "Result of check_rating.py: $check_rating"
+[ "$is_debug" = "yes" ] && echo "App Rating in US Store is: $APP_RATING"
+
 #function to check current version in AppStore and create if needed
 manage_version=$(python3 "${THIS_SCRIPT_DIR}/manage_version.py")
 export APP_VERSION=$(echo "$manage_version" | jq -r '.APP_VERSION')
@@ -48,15 +57,6 @@ source "${THIS_SCRIPT_DIR}/change_version.sh"
 if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ]; then
     source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
 fi
-
-#dsym upload preparing
-source "${THIS_SCRIPT_DIR}/crashlytics_prepare.sh"
-
-#check app rating
-check_rating=$(python3 "${THIS_SCRIPT_DIR}/check_rating.py")
-export APP_RATING=$(echo "$check_rating" | jq -r '.APP_RATING')
-[ "$is_debug" = "yes" ] && echo "Result of check_rating.py: $check_rating"
-[ "$is_debug" = "yes" ] && echo "App Rating in US Store is: $APP_RATING"
 
 script_result=$?
 exit ${script_result}
