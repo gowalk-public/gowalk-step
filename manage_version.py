@@ -5,34 +5,30 @@ import os
 import json
 from packaging.version import parse
 
-def load_env_variables():
-    return {
-        "APP_ID": os.environ.get('APP_ID'),
-        "BUNDLE_ID": os.environ.get('PRODUCT_BUNDLE_IDENTIFIER'),
-        "KEY_ID": os.environ.get('APPLE_KEY_ID'),
-        "ISSUER_ID": os.environ.get('APPLE_ISSUER_ID'),
-        "PRIVATE_KEY": os.environ.get('APPLE_PRIVATE_KEY')
-        #For debug:
-        #"APP_ID": "",
-        #"BUNDLE_ID": "",
-        #"KEY_ID": "",
-        #"ISSUER_ID": "",
-        #"PRIVATE_KEY": """"""
-    }
+app_id = os.environ.get('APP_ID')
+bundle_id = os.environ.get('PRODUCT_BUNDLE_IDENTIFIER')
+key_id = os.environ.get('APPLE_KEY_ID')
+issuer_id = os.environ.get('APPLE_ISSUER_ID')
+private_key = os.environ.get('APPLE_PRIVATE_KEY')
 
-def generate_jwt_token(issuer_id, key_id, private_key):
-    # Generates a JWT token using the given issuer ID, key ID, and the private key string.
-    # The private key is passed directly as a string
+#For Debug
+#app_id = "6473677751"
+#bundle_id = "gowalk.fastingApp.com"
+#key_id = "5NWGU79GMQ"
+#issuer_id = "f24f1629-3461-4a57-8807-8f7c9964d652"
+#private_key = """"""
 
-    # Generate an expiration time (20 minutes from now)
-    expir = round(time.time() + 20 * 60)
-
-    # Sign the token
-    return jwt.encode(
-        {'iss': issuer_id, 'iat': round(time.time()), 'exp': expir, 'aud': 'appstoreconnect-v1'},
-        private_key, algorithm='ES256',
-        headers={'alg': 'ES256', 'kid': key_id, 'typ': 'JWT'}
-    )
+# Create the JWT Token
+jwt_token = jwt.encode(
+    {
+        'iss': issuer_id,
+        'exp': time.time() + 60*20,
+        'aud': 'appstoreconnect-v1'
+    },
+    private_key,
+    algorithm='ES256',
+    headers={'kid': key_id}
+)
 
 def get_latest_app_version(app_id, jwt_token):
     # Fetches the latest app version information from the App Store API.
@@ -49,7 +45,6 @@ def get_latest_app_version(app_id, jwt_token):
     response = requests.get(url, headers=headers)
     # Comment if not debug
     #print(f"The get_latest_app_version response is: {response.json()}")
-    print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
@@ -118,9 +113,7 @@ def create_app_store_version(app_id, version_string, jwt_token):
     return response.json()
 
 def main():
-    env_vars = load_env_variables()
-    jwt_token = generate_jwt_token(env_vars['ISSUER_ID'], env_vars['KEY_ID'], env_vars['PRIVATE_KEY'])
-    latest_version_attributes = get_latest_app_version(env_vars['APP_ID'], jwt_token)
+    latest_version_attributes = get_latest_app_version(app_id, jwt_token)
     app_store_state = latest_version_attributes.get('appStoreState')
     current_version_id = latest_version_attributes.get('appStoreVersionId')
     current_version = latest_version_attributes.get('versionString')
@@ -130,7 +123,7 @@ def main():
         return
     elif app_store_state == 'READY_FOR_SALE': #and os.getenv('create_new_version') == 'yes':
         new_version = calculate_next_version(current_version)
-        response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
+        response = create_app_store_version(app_id, new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
         new_app_store_state = response.get('data', {}).get('appStoreState')
         result = {'APP_VERSION': new_version, 'APP_VERSION_ID': new_version_id, 'APP_STATUS': new_app_store_state}
