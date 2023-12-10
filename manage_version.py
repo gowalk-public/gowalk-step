@@ -95,7 +95,7 @@ def create_app_store_version(app_id, version_string, jwt_token):
             "attributes": {
                 "platform": "IOS",
                 "versionString": version_string,
-                "releaseType": "MANUAL",
+                "releaseType": "AFTER_APPROVAL",
             },
             "relationships": {
                 "app": {
