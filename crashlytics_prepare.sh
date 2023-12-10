@@ -11,18 +11,20 @@ cp "${THIS_SCRIPT_DIR}/crashlytics/upload-symbols" "$BITRISE_SOURCE_DIR/crashlyt
 plist_files=$(find $BITRISE_SOURCE_DIR -name "*.plist")
 
 # Filter the files
-for file in $plist_files; do
-    # Step 2: Check if file contains PRODUCT_BUNDLE_IDENTIFIER
+while IFS= read -r file; do
     if grep -q "<string>$PRODUCT_BUNDLE_IDENTIFIER</string>" "$file"; then
-        # Step 3: Check for IS_ANALYTICS_ENABLED
         if grep -q "<key>IS_ANALYTICS_ENABLED</key>" "$file"; then
-            # Step 4: Check for IS_ADS_ENABLED
             if grep -q "<key>IS_ADS_ENABLED</key>" "$file"; then
-                # Step 5: Copy the first matching file
                 cp "$file" "$BITRISE_SOURCE_DIR/crashlytics/GoogleService-Info.plist"
                 [ "$is_debug" = "yes" ] && echo "$file copied to $BITRISE_SOURCE_DIR/crashlytics/GoogleService-Info.plist"
                 break
+            else
+                [ "$is_debug" = "yes" ] && echo "IS_ADS_ENABLED not found in $file"
             fi
+        else
+            [ "$is_debug" = "yes" ] && echo "IS_ANALYTICS_ENABLED not found in $file"
         fi
+    else
+        [ "$is_debug" = "yes" ] && echo "PRODUCT_BUNDLE_IDENTIFIER not found in $file"
     fi
-done
+done <<< "$plist_files"
