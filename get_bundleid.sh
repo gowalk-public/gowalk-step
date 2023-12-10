@@ -10,4 +10,4 @@ bundle_identifier=$(echo "$output" | grep PRODUCT_BUNDLE_IDENTIFIER | cut -d '='
 export PRODUCT_BUNDLE_IDENTIFIER="$bundle_identifier"
 
 # Optional: Display the value (for verification)
-[ "$IS_DEBUG" -eq "1" ] && echo "PRODUCT_BUNDLE_IDENTIFIER: $PRODUCT_BUNDLE_IDENTIFIER"
+[ "$IS_DEBUG" = "yes" ] && echo "PRODUCT_BUNDLE_IDENTIFIER: $PRODUCT_BUNDLE_IDENTIFIER"
