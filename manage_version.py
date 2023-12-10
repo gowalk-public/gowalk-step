@@ -12,6 +12,12 @@ def load_env_variables():
         "KEY_ID": os.environ.get('APPLE_KEY_ID'),
         "ISSUER_ID": os.environ.get('APPLE_ISSUER_ID'),
         "PRIVATE_KEY": os.environ.get('APPLE_PRIVATE_KEY')
+        #For debug:
+        #"APP_ID": "",
+        #"BUNDLE_ID": "",
+        #"KEY_ID": "",
+        #"ISSUER_ID": "",
+        #"PRIVATE_KEY": """"""
     }
 
 def generate_jwt_token(issuer_id, key_id, private_key):
@@ -108,6 +114,7 @@ def create_app_store_version(app_id, version_string, jwt_token):
     response = requests.post(url, json=payload, headers=headers)
     # Comment if not debug
     #print(f"The create_app_store_version response is: {response.json()}")
+    return response.json()
 
 def main():
     env_vars = load_env_variables()
@@ -120,7 +127,7 @@ def main():
     if app_store_state == 'PENDING_DEVELOPER_RELEASE':
         print("Error: App is Pending Developer Release. Publish it in AppStore when try again")
         return
-    elif app_store_state == 'READY_FOR_SALE' and os.getenv('create_new_version') == 'yes':
+    elif app_store_state == 'READY_FOR_SALE': #and os.getenv('create_new_version') == 'yes':
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
