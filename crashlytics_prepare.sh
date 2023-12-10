@@ -14,10 +14,10 @@ plist_files=$(find $BITRISE_SOURCE_DIR -name "*.plist")
 for file in $plist_files; do
     # Step 2: Check if file contains PRODUCT_BUNDLE_IDENTIFIER
     if grep -q "<string>$PRODUCT_BUNDLE_IDENTIFIER</string>" "$file"; then
-        # Step 3: Check for CLIENT_ID
-        if grep -q "<key>CLIENT_ID</key>" "$file"; then
-            # Step 4: Check for REVERSED_CLIENT_ID
-            if grep -q "<key>REVERSED_CLIENT_ID</key>" "$file"; then
+        # Step 3: Check for IS_ANALYTICS_ENABLED
+        if grep -q "<key>IS_ANALYTICS_ENABLED</key>" "$file"; then
+            # Step 4: Check for IS_ADS_ENABLED
+            if grep -q "<key>IS_ADS_ENABLED</key>" "$file"; then
                 # Step 5: Copy the first matching file
                 cp "$file" "$BITRISE_SOURCE_DIR/crashlytics/GoogleService-Info.plist"
                 [ "$is_debug" = "yes" ] && echo "$file copied to $BITRISE_SOURCE_DIR/crashlytics/GoogleService-Info.plist"
