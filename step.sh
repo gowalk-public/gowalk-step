@@ -55,7 +55,14 @@ source "${THIS_SCRIPT_DIR}/change_version.sh"
 
 #function to update What's New field in AppStoreConnect
 if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ]; then
-    source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
+    case "$APP_VERSION" in
+        "1.0"|"1.0.0"|"0.0.0"|"0.0")
+            [ "$is_debug" = "yes" ] && echo "It's a first App version, What's new will not be updated"
+            ;;
+        *)
+            source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
+            ;;
+    esac
 fi
 
 script_result=$?
