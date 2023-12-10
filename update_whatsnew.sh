@@ -23,7 +23,7 @@ cat << EOF > "./fastlane/key.json"
 }
 EOF
 
-if [ "$IS_DEBUG" = "yes" ]; then
+if [ "$is_debug" = "yes" ]; then
   fastlane run set_changelog api_key_path:"./fastlane/key.json" version:"$APP_VERSION" app_identifier:"$PRODUCT_BUNDLE_IDENTIFIER"
 else
   fastlane run set_changelog api_key_path:"./fastlane/key.json" version:"$APP_VERSION" app_identifier:"$PRODUCT_BUNDLE_IDENTIFIER" >/dev/null 2>&1
