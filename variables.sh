@@ -3,7 +3,6 @@
 export runner_bin="/bin/bash"
 export working_dir="$BITRISE_SOURCE_DIR"
 export script_file_path=""
-export is_debug="no"
 
 export SUBDIR=$(dirname "$BITRISE_PROJECT_PATH")
 if [ "$SUBDIR" = "." ]; then
