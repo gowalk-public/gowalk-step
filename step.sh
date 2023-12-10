@@ -5,9 +5,13 @@ export THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
 #Install Python packages from requirements
-[ "$IS_DEBUG" = "yes" ] && echo "Installing Python packages from requirements.txt..."
-pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt"
-[ "$IS_DEBUG" = "yes" ] && echo "Installation complete"
+if [ "$IS_DEBUG" = "yes" ]; then
+    echo "Installing Python packages from requirements.txt..."
+    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt"
+    echo "Installation complete"
+else
+    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt" >/dev/null 2>&1
+fi
 
 #config
 source "${THIS_SCRIPT_DIR}/variables.sh"
