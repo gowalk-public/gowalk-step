@@ -41,8 +41,8 @@ def get_latest_app_version(app_id, jwt_token):
 
     # Make the GET request
     response = requests.get(url, headers=headers)
-    if os.getenv('IS_DEBUG') == 'yes':
-        print(f"The get_latest_app_version response is: {response.json()}")
+    # Comment if not debug
+    #print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
     if response.status_code == 200:
         data = response.json()
@@ -106,9 +106,8 @@ def create_app_store_version(app_id, version_string, jwt_token):
         }
     }
     response = requests.post(url, json=payload, headers=headers)
-    if os.getenv('IS_DEBUG') == 'yes':
-        print(f"The create_app_store_version response is: {response.json()}")
-    return response.json()
+    # Comment if not debug
+    #print(f"The create_app_store_version response is: {response.json()}")
 
 def main():
     env_vars = load_env_variables()
@@ -121,7 +120,7 @@ def main():
     if app_store_state == 'PENDING_DEVELOPER_RELEASE':
         print("Error: App is Pending Developer Release. Publish it in AppStore when try again")
         return
-    elif app_store_state == 'READY_FOR_SALE' and os.getenv('CREATE_NEW_VERSION') == 'yes':
+    elif app_store_state == 'READY_FOR_SALE' and os.getenv('create_new_version') == 'yes':
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(env_vars['APP_ID'], new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
