@@ -1,16 +1,11 @@
 #!/usr/bin/env bash
 
-
-BITRISE_TARGET
-
 if [ -z "${BITRISE_TARGET}" ]; then
     output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_TARGET" "-configuration" "Release" "-showBuildSettings")
-    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used this command:"
-    [ "$is_debug" = "yes" ] && echo 'xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings"'
+    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used BITRISE_TARGET"
 else
     output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
-    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used this command:"
-    [ "$is_debug" = "yes" ] && echo 'xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings"'
+    [ "$is_debug" = "yes" ] && echo "To identify Bundle ID will be used BITRISE_TARGET"
 fi
 
 # Find the line containing PRODUCT_BUNDLE_IDENTIFIER and extract its value
