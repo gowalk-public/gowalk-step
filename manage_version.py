@@ -125,7 +125,7 @@ def main():
         new_version = calculate_next_version(current_version)
         response = create_app_store_version(app_id, new_version, jwt_token)
         new_version_id = response.get('data', {}).get('id')
-        new_app_store_state = response.get('data', {}).get('appStoreState')
+        new_app_store_state = 'PREPARE_FOR_SUBMISSION'
         result = {'APP_VERSION': new_version, 'APP_VERSION_ID': new_version_id, 'APP_STATUS': new_app_store_state}
     else:
         result = {'APP_VERSION': current_version, 'APP_VERSION_ID': current_version_id, 'APP_STATUS': app_store_state}
