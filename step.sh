@@ -23,7 +23,7 @@ source "${THIS_SCRIPT_DIR}/pods_packages.sh"
 source "${THIS_SCRIPT_DIR}/appstore_creds.sh"
 
 #function to get budnle id from Xcode project
-source "${THIS_SCRIPT_DIR}/get_bundleid.sh"
+source "${THIS_SCRIPT_DIR}/get_xcode_config.sh"
 
 #function to get app id from AppStoreConnect API
 getappid=$(python3 "${THIS_SCRIPT_DIR}/getappid.py")
@@ -53,17 +53,8 @@ export APP_STATUS=$(echo "$manage_version" | jq -r '.APP_STATUS')
 #functions to change app version and build in xcode project
 source "${THIS_SCRIPT_DIR}/change_version.sh"
 
-#function to update What's New field in AppStoreConnect
-if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ]; then
-    case "$APP_VERSION" in
-        "1.0"|"1.0.0"|"0.0.0"|"0.0")
-            [ "$is_debug" = "yes" ] && echo "It's a first App version, What's new will not be updated"
-            ;;
-        *)
-            source "${THIS_SCRIPT_DIR}/update_whatsnew.sh"
-            ;;
-    esac
-fi
+#run Fastlane scripts - update what's new and set encryption settings
+source "${THIS_SCRIPT_DIR}/fastlane_scripts.sh"
 
 script_result=$?
 exit ${script_result}
