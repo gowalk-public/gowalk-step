@@ -4,6 +4,14 @@ export LANG=en_US.UTF-8
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
+if [ -n "${BITRISE_TARGET}" ]; then
+    FASTLANE_SCHEME=$BITRISE_TARGET
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_TARGET"
+else
+    FASTLANE_SCHEME=$BITRISE_SCHEME
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_SCHEME"
+fi
+
 rm -rf "./fastlane"
 mkdir "./fastlane"
 
@@ -28,7 +36,7 @@ EOF
 cat << EOF > "./fastlane/Fastfile"
 lane :update_encryption_settings do
   update_info_plist(
-    scheme: "$BITRISE_SCHEME",
+    scheme: "$FASTLANE_SCHEME",
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['ITSAppUsesNonExemptEncryption'] = false
