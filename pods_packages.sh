@@ -12,12 +12,18 @@ if [ "$remove_podsfile_lock" = "yes" ]; then
     rm -rf "$APP_WORKING_DIR/Podfile.lock"
     [ "$is_debug" = "yes" ] && echo "Podfile.lock removed"
 elif [ "$last_gowalk_helper" = "yes" ]; then
-# Force to use last Gowalk Helper
-    if [ -f "Podfile" ]; then
-        if grep -q "GowalkDevHelper" "Podfile"; then
-            pod install
-            pod update GowalkDevHelper
-            [ "$is_debug" = "yes" ] && echo "GowalkDevHelper updated"
+# Force to use last Gowalk Helper if not Flutter
+    if [ ! -d "$BITRISE_SOURCE_DIR/ios/Flutter" ]; then
+        if [ -f "Podfile" ]; then
+            if grep -q "GowalkDevHelper" "Podfile"; then
+                pod install
+                pod update GowalkDevHelper
+                [ "$is_debug" = "yes" ] && echo "GowalkDevHelper updated"
+                if grep -q "GowalkOnboardingSDK" "Podfile"; then
+                    pod update GowalkOnboardingSDK
+                    [ "$is_debug" = "yes" ] && echo "GowalkOnboardingSDK updated"
+                fi
+            fi
         fi
     fi
 fi

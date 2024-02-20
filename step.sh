@@ -51,7 +51,11 @@ export APP_STATUS=$(echo "$manage_version" | jq -r '.APP_STATUS')
 [ "$is_debug" = "yes" ] && echo "APP_STATUS: $APP_STATUS"
 
 #functions to change app version and build in xcode project
-source "${THIS_SCRIPT_DIR}/change_version.sh"
+if [ -d "$BITRISE_SOURCE_DIR/ios/Flutter" ]; then
+    source "${THIS_SCRIPT_DIR}/flutter.sh"
+else
+    source "${THIS_SCRIPT_DIR}/change_version.sh"
+fi
 
 #run Fastlane scripts - update what's new and set encryption settings
 source "${THIS_SCRIPT_DIR}/fastlane_scripts.sh"
