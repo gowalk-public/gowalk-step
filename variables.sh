@@ -16,5 +16,10 @@ else
 fi
 
 export PROJECT_DIR=$(ls "$APP_WORKING_DIR" | grep ".xcodeproj$" | head -n 1)
-export PROJECT_FILE="$APP_WORKING_DIR/$PROJECT_DIR"
 export PROJECT="$APP_WORKING_DIR/$PROJECT_DIR/project.pbxproj"
+export PROJECT_FILE="$APP_WORKING_DIR/$PROJECT_DIR"
+
+if [ -d "$BITRISE_SOURCE_DIR/ios/Flutter" ]; then
+    export BITRISE_PROJECT_PATH="ios/Runner.xcodeproj"
+    export BITRISE_SCHEME="Runner"
+fi
