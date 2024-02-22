@@ -2,7 +2,6 @@
 
 # Remove Package.resolved files
 if [ "$remove_package_resolved" = "yes" ]; then
-~/git/pdd/Pdd.xcworkspace/xcshareddata/swiftpm
     echo "Path to Package.resolved: $APP_WORKING_DIR/$WORKSPACE_DIR/xcshareddata/swiftpm/Package.resolved"
     echo "Path2 to Package.resolved: $APP_WORKING_DIR/$PROJECT_DIR/project.xcworkspace/xcshareddata/swiftpm/Package.resolved"
     echo "Path to Podfile.lock: $APP_WORKING_DIR/Podfile.lock"

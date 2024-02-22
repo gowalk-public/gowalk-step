@@ -21,5 +21,6 @@ else
 fi
 
 export PROJECT_DIR=$(ls "$APP_WORKING_DIR" | grep ".xcodeproj$" | head -n 1)
+export WORKSPACE_DIR=$(ls "$APP_WORKING_DIR" | grep ".xcworkspace$" | head -n 1)
 export PROJECT="$APP_WORKING_DIR/$PROJECT_DIR/project.pbxproj"
 export PROJECT_FILE="$APP_WORKING_DIR/$PROJECT_DIR"
