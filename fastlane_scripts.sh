@@ -53,7 +53,7 @@ else
 fi
 
 #Update what's new only if status PREPARE_FOR_SUBMISSION, update_whats_new = yes and this is "appstore-release" workflow
-if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ]; then
+if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && { [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "deploy" ]; }; then
     case "$APP_VERSION" in
         "1.0"|"1.0.0"|"0.0.0"|"0.0")
             [ "$is_debug" = "yes" ] && echo "It's a first App version, What's new will not be updated"
