@@ -40,8 +40,8 @@ lane :update_encryption_settings do
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['ITSAppUsesNonExemptEncryption'] = false
-      plist['CFBundleVersion'] = $APP_VERSION
-      plist['CFBundleShortVersionString'] = $APP_VERSION
+      plist['CFBundleVersion'] = '$APP_VERSION'
+      plist['CFBundleShortVersionString'] = '$APP_VERSION'
     end
   )
 end
