@@ -40,7 +40,7 @@ lane :update_encryption_settings do
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['ITSAppUsesNonExemptEncryption'] = false
-      plist['CFBundleVersion'] = '$APP_VERSION'
+      plist['CFBundleVersion'] = '$BITRISE_BUILD_NUMBER'
       plist['CFBundleShortVersionString'] = '$APP_VERSION'
     end
   )
