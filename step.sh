@@ -7,10 +7,10 @@ export CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 #Install Python packages from requirements
 if [ "$is_debug" = "yes" ]; then
     echo "Installing Python packages from requirements.txt..."
-    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt"
+    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt" --break-system-packages
     echo "Installation complete"
 else
-    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt" >/dev/null 2>&1
+    pip3 install -r "${THIS_SCRIPT_DIR}/requirements.txt" --break-system-packages >/dev/null 2>&1
 fi
 
 #config
