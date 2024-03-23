@@ -4,6 +4,22 @@ export LANG=en_US.UTF-8
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
+# Check if md5sum is installed
+if ! command -v md5sum &> /dev/null; then
+    echo "md5sum could not be found. Installing..."
+    # Check if Homebrew is installed
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew is not installed."
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &> /dev/null
+    else
+        # Install md5sum via Homebrew
+        brew install md5sha1sum &> /dev/null
+    fi
+else
+    echo "md5sum is already installed."
+fi
+  
 #Generate paybonus scheme
 paybonus=$(echo "paybonus$(( (0x$(echo -n "$APP_ID" | md5sum | cut -c 1-8) % 45) + 1 ))")
 
@@ -76,35 +92,42 @@ need_comit=0
 if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
   if [ "$is_debug" = "yes" ]; then
     fastlane update_encryption_settings
+    echo "Fastlane update_encryption_settings finished"
   else
     fastlane update_encryption_settings >/dev/null 2>&1
+    echo "Fastlane update_encryption_settings finished"
   fi
   need_comit=1
+else
+  echo "ITSAppUsesNonExemptEncryption encryption settings found, no need to add"
 fi
 
 # Check for "paybonus" and add paybonus scheme if not found
 if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
   if [ "$is_debug" = "yes" ]; then
     fastlane add_paybonus_scheme
+    echo "Fastlane add_paybonus_scheme finished. URLScheme is: $paybonus"
   else
     fastlane add_paybonus_scheme >/dev/null 2>&1
+    echo "Fastlane add_paybonus_scheme finished"
   fi
   need_comit=1
+else
+  echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
 fi
 
 # Commit changes to repo if needed
 if [ "$need_comit" = 1 ]; then
   # Check for uncommitted changes in the git repository
-  if ! git diff --name-only HEAD | grep -v '^fastlane/' | read -r; then
+if ! git status --porcelain | grep -vE '^??' | grep -vE '^(.*/)?fastlane/' | grep -vE 'pubspec\.yaml$'; then
       echo "No changes to commit."
   else
       # Add all changes to the staging area except fastlane
-      git add . && git reset -- fastlane/
+      git add . && git reset -- fastlane/ pubspec.yaml
 
       # Commit the changes
-      echo "Auto-comit"
       read commitMessage
-      git commit -m "$commitMessage"
+      git commit -m "Bitrise comit"
 
       # Push the changes to the remote repository
       echo "Pushing to remote repository..."
@@ -118,8 +141,10 @@ fi
 #Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
   fastlane update_build_version
+  echo "Fastlane updated build and version numbers"
 else
   fastlane update_build_version >/dev/null 2>&1
+  echo "Fastlane updated build and version numbers"
 fi
 
 #Update what's new only if status PREPARE_FOR_SUBMISSION, update_whats_new = yes and this is "appstore-release" workflow
