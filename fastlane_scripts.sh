@@ -4,6 +4,9 @@ export LANG=en_US.UTF-8
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
+#Generate paybonus scheme
+paybonus=$(echo "paybonus$(( (0x$(echo -n "$APP_ID" | md5sum | cut -c 1-8) % 45) + 1 ))")
+
 if [ -n "${BITRISE_TARGET}" ]; then
     FASTLANE_SCHEME=$BITRISE_TARGET
     [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_TARGET"
@@ -40,18 +43,66 @@ lane :update_encryption_settings do
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['ITSAppUsesNonExemptEncryption'] = false
+    end
+  )
+end
+lane :update_build_version do
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
       plist['CFBundleVersion'] = '$BITRISE_BUILD_NUMBER'
       plist['CFBundleShortVersionString'] = '$APP_VERSION'
     end
   )
 end
+lane :add_paybonus_scheme do
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
+      plist['CFBundleURLTypes'] ||= []
+      plist['CFBundleURLTypes'] << {
+        'CFBundleURLSchemes' => ['$paybonus']
+      }
+    end
+  )
+end
 EOF
 
-#Update build encryption settings
+need_comit=0
+
+# Check for "ITSAppUsesNonExemptEncryption" and update encryption settings if not found
+if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
+  if [ "$is_debug" = "yes" ]; then
+    fastlane update_encryption_settings
+  else
+    fastlane update_encryption_settings >/dev/null 2>&1
+  fi
+  need_comit=1
+fi
+
+# Check for "paybonus" and add paybonus scheme if not found
+if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
+  if [ "$is_debug" = "yes" ]; then
+    fastlane add_paybonus_scheme
+  else
+    fastlane add_paybonus_scheme >/dev/null 2>&1
+  fi
+  need_comit=1
+fi
+
+# Commit changes to repo if needed
+if [ "$need_comit" = 1 ]; then
+  source "${THIS_SCRIPT_DIR}/git_commit.sh"
+fi
+
+
+#Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
-  fastlane update_encryption_settings
+  fastlane update_build_version
 else
-  fastlane update_encryption_settings >/dev/null 2>&1
+  fastlane update_build_version >/dev/null 2>&1
 fi
 
 #Update what's new only if status PREPARE_FOR_SUBMISSION, update_whats_new = yes and this is "appstore-release" workflow
@@ -69,3 +120,5 @@ if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION"
             ;;
     esac
 fi
+
+rm -rf "./fastlane"
