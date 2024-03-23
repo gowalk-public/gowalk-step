@@ -94,7 +94,24 @@ fi
 
 # Commit changes to repo if needed
 if [ "$need_comit" = 1 ]; then
-  source "${THIS_SCRIPT_DIR}/git_commit.sh"
+  # Check for uncommitted changes in the git repository
+  if ! git diff --name-only HEAD | grep -v '^fastlane/' | read -r; then
+      echo "No changes to commit."
+  else
+      # Add all changes to the staging area except fastlane
+      git add . && git reset -- fastlane/
+
+      # Commit the changes
+      echo "Auto-comit"
+      read commitMessage
+      git commit -m "$commitMessage"
+
+      # Push the changes to the remote repository
+      echo "Pushing to remote repository..."
+      git push origin main
+
+      echo "Changes committed and pushed to remote repository successfully."
+  fi
 fi
 
 
