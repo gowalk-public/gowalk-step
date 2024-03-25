@@ -127,7 +127,9 @@ if [ "$need_comit" = 1 ]; then
 
     # Push the changes to the remote repository
     echo "Pushing to remote repository..."
-    git push origin main
+    git config --global push.default current
+    git config push.default current
+    git push
 
     echo "Changes committed and pushed to remote repository successfully."
 fi
