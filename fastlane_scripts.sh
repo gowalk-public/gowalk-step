@@ -118,23 +118,18 @@ fi
 
 # Commit changes to repo if needed
 if [ "$need_comit" = 1 ]; then
-  # Check for uncommitted changes in the git repository
-if ! git status --porcelain | grep -vE '^??' | grep -vE '^(.*/)?fastlane/' | grep -vE 'pubspec\.yaml$'; then
-      echo "No changes to commit."
-  else
-      # Add all changes to the staging area except fastlane
-      git add . && git reset -- fastlane/ pubspec.yaml
+    # Add all changes to the staging area except fastlane
+    git add . && git reset -- fastlane/ pubspec.yaml
 
-      # Commit the changes
-      read commitMessage
-      git commit -m "Bitrise comit"
+    # Commit the changes
+    read commitMessage
+    git commit -m "Bitrise comit"
 
-      # Push the changes to the remote repository
-      echo "Pushing to remote repository..."
-      git push origin main
+    # Push the changes to the remote repository
+    echo "Pushing to remote repository..."
+    git push origin main
 
-      echo "Changes committed and pushed to remote repository successfully."
-  fi
+    echo "Changes committed and pushed to remote repository successfully."
 fi
 
 
