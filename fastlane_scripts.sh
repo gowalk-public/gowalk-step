@@ -4,12 +4,31 @@ export LANG=en_US.UTF-8
 
 FORMATTED_PRIVATE_KEY=$(echo "$APPLE_PRIVATE_KEY" | awk 'ORS="\\n"')
 
+# Check if md5sum is installed
+if ! command -v md5sum &> /dev/null; then
+    echo "md5sum could not be found. Installing..."
+    # Check if Homebrew is installed
+    if ! command -v brew &> /dev/null; then
+        echo "Homebrew is not installed."
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" &> /dev/null
+    else
+        # Install md5sum via Homebrew
+        brew install md5sha1sum &> /dev/null
+    fi
+else
+    echo "md5sum is already installed."
+fi
+  
+#Generate paybonus scheme
+paybonus=$(echo "paybonus$(( (0x$(echo -n "$APP_ID" | md5sum | cut -c 1-8) % 45) + 1 ))")
+
 if [ -n "${BITRISE_TARGET}" ]; then
     FASTLANE_SCHEME=$BITRISE_TARGET
-    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_TARGET"
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used $BITRISE_TARGET"
 else
     FASTLANE_SCHEME=$BITRISE_SCHEME
-    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_SCHEME"
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used $BITRISE_SCHEME"
 fi
 
 rm -rf "./fastlane"
@@ -40,18 +59,71 @@ lane :update_encryption_settings do
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['ITSAppUsesNonExemptEncryption'] = false
+    end
+  )
+end
+lane :update_build_version do
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
       plist['CFBundleVersion'] = '$BITRISE_BUILD_NUMBER'
       plist['CFBundleShortVersionString'] = '$APP_VERSION'
     end
   )
 end
+lane :add_paybonus_scheme do
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
+      plist['CFBundleURLTypes'] ||= []
+      plist['CFBundleURLTypes'] << {
+        'CFBundleURLSchemes' => ['$paybonus']
+      }
+    end
+  )
+end
 EOF
 
-#Update build encryption settings
-if [ "$is_debug" = "yes" ]; then
-  fastlane update_encryption_settings
+need_comit=0
+
+# Check for "ITSAppUsesNonExemptEncryption" and update encryption settings if not found
+if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
+  if [ "$is_debug" = "yes" ]; then
+    fastlane update_encryption_settings
+    echo "Fastlane update_encryption_settings finished"
+  else
+    fastlane update_encryption_settings >/dev/null 2>&1
+    echo "Fastlane update_encryption_settings finished"
+  fi
 else
-  fastlane update_encryption_settings >/dev/null 2>&1
+  echo "ITSAppUsesNonExemptEncryption encryption settings found, no need to add"
+fi
+
+# Check for "paybonus" and add paybonus scheme if not found
+if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
+  if [ "$is_debug" = "yes" ]; then
+    fastlane add_paybonus_scheme
+    echo "Fastlane add_paybonus_scheme finished. URLScheme is: $paybonus"
+  else
+    fastlane add_paybonus_scheme >/dev/null 2>&1
+    echo "Fastlane add_paybonus_scheme finished"
+  fi
+else
+  echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
+fi
+
+#Add Paybonus URLscheme to artifacts
+touch "$BITRISE_DEPLOY_DIR/${paybonus}.txt"
+      
+#Update version and build numbers
+if [ "$is_debug" = "yes" ]; then
+  fastlane update_build_version
+  echo "Fastlane updated build and version numbers"
+else
+  fastlane update_build_version >/dev/null 2>&1
+  echo "Fastlane updated build and version numbers"
 fi
 
 #Update what's new only if status PREPARE_FOR_SUBMISSION, update_whats_new = yes and this is "appstore-release" workflow
@@ -69,3 +141,5 @@ if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION"
             ;;
     esac
 fi
+
+rm -rf "./fastlane"

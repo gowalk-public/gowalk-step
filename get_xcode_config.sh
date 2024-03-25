@@ -18,7 +18,7 @@ export PRODUCT_BUNDLE_IDENTIFIER="$bundle_identifier"
 [ "$is_debug" = "yes" ] && echo "PRODUCT_BUNDLE_IDENTIFIER: $PRODUCT_BUNDLE_IDENTIFIER"
 
 # Find the line containing INFOPLIST_FILE and extract its value
-info_plist_file=$(echo "$output" | grep INFOPLIST_FILE | cut -d '=' -f2 | xargs)
+info_plist_file=$(echo "$output" | grep ' INFOPLIST_FILE =' | cut -d '=' -f2 | xargs)
 
 # Export the INFOPLIST_FILE environment variable
 export INFOPLIST_FILE="$APP_WORKING_DIR/$info_plist_file"

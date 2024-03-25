@@ -31,6 +31,12 @@ export APP_ID=$(echo "$getappid" | jq -r '.APP_ID')
 [ "$is_debug" = "yes" ] && echo "Result of getappid.py: $getappid"
 [ "$is_debug" = "yes" ] && echo "APP_ID: $APP_ID"
 
+#exit with error if no App ID
+if [ -z "$APP_ID" ]; then
+  echo "ERROR: APP_ID is not set" >&2
+  exit 1
+fi
+
 #dsym upload preparing
 source "${THIS_SCRIPT_DIR}/crashlytics_prepare.sh"
 
