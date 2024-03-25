@@ -25,10 +25,10 @@ paybonus=$(echo "paybonus$(( (0x$(echo -n "$APP_ID" | md5sum | cut -c 1-8) % 45)
 
 if [ -n "${BITRISE_TARGET}" ]; then
     FASTLANE_SCHEME=$BITRISE_TARGET
-    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_TARGET"
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used $BITRISE_TARGET"
 else
     FASTLANE_SCHEME=$BITRISE_SCHEME
-    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used BITRISE_SCHEME"
+    [ "$is_debug" = "yes" ] && echo "For Fastlane will be used $BITRISE_SCHEME"
 fi
 
 rm -rf "./fastlane"
@@ -97,7 +97,6 @@ if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
     fastlane update_encryption_settings >/dev/null 2>&1
     echo "Fastlane update_encryption_settings finished"
   fi
-  need_comit=1
 else
   echo "ITSAppUsesNonExemptEncryption encryption settings found, no need to add"
 fi
@@ -111,30 +110,13 @@ if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
     fastlane add_paybonus_scheme >/dev/null 2>&1
     echo "Fastlane add_paybonus_scheme finished"
   fi
-  need_comit=1
 else
   echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
 fi
 
-# Commit changes to repo if needed
-if [ "$need_comit" = 1 ]; then
-    # Add all changes to the staging area except fastlane
-    git add . && git reset -- fastlane/ pubspec.yaml
-
-    # Commit the changes
-    read commitMessage
-    git commit -m "Bitrise comit"
-
-    # Push the changes to the remote repository
-    echo "Pushing to remote repository..."
-    git config --global push.default current
-    git config push.default current
-    git push
-
-    echo "Changes committed and pushed to remote repository successfully."
-fi
-
-
+#Add Paybonus URLscheme to artifacts
+touch "$BITRISE_DEPLOY_DIR/${paybonus}.txt"
+      
 #Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
   fastlane update_build_version
