@@ -116,7 +116,8 @@ else
 fi
 
 #Add Paybonus URLscheme to artifacts
-touch "$BITRISE_DEPLOY_DIR/${paybonus}.txt"
+paybonus_artifact="${BITRISE_DEPLOY_DIR}/${paybonus}.txt"
+touch "${paybonus_artifact}"
       
 #Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
@@ -142,5 +143,3 @@ if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION"
             ;;
     esac
 fi
-
-rm -rf "./fastlane"
