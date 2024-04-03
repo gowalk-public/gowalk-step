@@ -111,7 +111,7 @@ if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
     echo "Fastlane add_paybonus_scheme finished"
   fi
 else
-  paybonus=$(echo "$(grep "paybonus" "$INFOPLIST_FILE")" | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
+  paybonus=$(grep "paybonus" "$INFOPLIST_FILE" | head -n 1 | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
   echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
 fi
 
