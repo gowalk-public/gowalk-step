@@ -84,9 +84,27 @@ lane :add_paybonus_scheme do
     end
   )
 end
-EOF
+lane :add_application_query_schemes do |options|
+  schemes = (options[:schemes] || '').split(',')
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
+      plist['LSApplicationQueriesSchemes'] ||= []
 
-need_comit=0
+      schemes.each do |scheme|
+        scheme.strip!  # Remove any extra whitespace
+        if plist['LSApplicationQueriesSchemes'].include?(scheme)
+          UI.message("Scheme '#{scheme}' already exists in LSApplicationQueriesSchemes.")
+        else
+          plist['LSApplicationQueriesSchemes'] << scheme
+          UI.message("Added scheme '#{scheme}' to LSApplicationQueriesSchemes.")
+        end
+      end
+    end
+  )
+end
+EOF
 
 # Check for "ITSAppUsesNonExemptEncryption" and update encryption settings if not found
 if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
@@ -114,6 +132,11 @@ else
   paybonus=$(grep "paybonus" "$INFOPLIST_FILE" | head -n 1 | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
   echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
 fi
+
+# Add deeplinks into LSApplicationQueriesSchemes
+SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping"
+fastlane add_application_query_schemes schemes:"$SCHEMES"
+echo "All schemes have been added in LSApplicationQueriesSchemes."
 
 #Add Paybonus URLscheme to artifacts
 paybonus_artifact="${BITRISE_DEPLOY_DIR}/${paybonus}.txt"
