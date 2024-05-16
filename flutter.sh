@@ -6,12 +6,11 @@ sed -i '' "/^version: /s/version: .*/version: $APP_VERSION+$BITRISE_BUILD_NUMBER
 
 if [[ -z "$flutter_version" ]]; then
     flutter upgrade
-    flutter pub get
 else
-    # Add your custom logic here when flutter_version param exists
-    echo "flutter_version param exists: $flutter_version"
+    git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
 fi
 
+flutter pub get
 cd ios
 rm -rf $BITRISE_SOURCE_DIR/ios/Podfile.lock $BITRISE_SOURCE_DIR/ios/Pods/
 pod install --repo-update
