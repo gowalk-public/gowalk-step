@@ -9,7 +9,8 @@ else
 fi
 
 # Find the line containing PRODUCT_BUNDLE_IDENTIFIER and extract its value
-bundle_identifier=$(echo "$output" | grep PRODUCT_BUNDLE_IDENTIFIER | cut -d '=' -f2 | xargs)
+bundle_identifier=$(echo "$output" | grep -E "^ *PRODUCT_BUNDLE_IDENTIFIER =" | cut -d '=' -f2 | xargs)
+
 
 # Export the PRODUCT_BUNDLE_IDENTIFIER environment variable
 export PRODUCT_BUNDLE_IDENTIFIER="$bundle_identifier"
