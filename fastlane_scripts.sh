@@ -36,8 +36,6 @@ mkdir "./fastlane"
 
 cat << EOF > "./fastlane/changelog.txt"
 - Improved Performance: Faster, smoother app experience
-- New Functionalities: Intuitive and user-friendly
-- Refreshed Design: Enhanced user interface
 - Bug Fixes: Minor issues resolved for seamless use
 - Enhanced Security: Updated to protect your data
 EOF
