@@ -10,7 +10,7 @@ else
     fvm install $flutter_version
     fvm use $flutter_version --force
     fvm flutter --version
-    git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
+    #git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
 fi
 
 flutter pub get
