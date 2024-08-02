@@ -13,7 +13,7 @@ else
     #git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
 fi
 
-flutter pub get
+#flutter pub get
 cd ios
 rm -rf $BITRISE_SOURCE_DIR/ios/Podfile.lock $BITRISE_SOURCE_DIR/ios/Pods/
-pod install --repo-update
+#pod install --repo-update
