@@ -11,6 +11,8 @@ else
     fvm use $flutter_version --force
     fvm flutter --version
     #git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
+    export FLUTTER_ROOT="/Users/vagrant/fvm/versions/$flutter_version"
+
 fi
 
 #flutter pub get
