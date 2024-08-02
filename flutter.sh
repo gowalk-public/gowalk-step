@@ -7,6 +7,9 @@ sed -i '' "/^version: /s/version: .*/version: $APP_VERSION+$BITRISE_BUILD_NUMBER
 if [[ -z "$flutter_version" ]]; then
     flutter upgrade
 else
+    fvm install $flutter_version
+    fvm use $flutter_version --force
+    fvm flutter --version
     git -C /Users/vagrant/fvm/default/bin/ checkout $flutter_version
 fi
 
