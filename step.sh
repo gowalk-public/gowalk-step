@@ -4,6 +4,9 @@
 export THIS_SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export CONFIG_tmp_script_file_path="${THIS_SCRIPT_DIR}/._script_cont"
 
+#print current configuration
+source "${THIS_SCRIPT_DIR}/machine_info.sh"
+
 #Install Python packages from requirements
 if [ "$is_debug" = "yes" ]; then
     echo "Installing Python packages from requirements.txt..."
