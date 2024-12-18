@@ -19,9 +19,21 @@ if ! command -v md5sum &> /dev/null; then
 else
     echo "md5sum is already installed."
 fi
-  
-#Generate paybonus scheme
-paybonus=$(echo "paybonus$(( (0x$(echo -n "$APP_ID" | md5sum | cut -c 1-8) % 45) + 1 ))")
+
+# Generate four distinct paybonus schemes based on APP_ID
+# Original formula for the first scheme (unchanged)
+hash=$(echo -n "$APP_ID" | md5sum | awk '{print $1}')
+N1=$(( (0x${hash:0:8} % 45) + 1 ))
+paybonus1="paybonus${N1}"
+
+# Three new formulas for additional schemes
+# Each one uses a different part of the hash and a different modulus to ensure different values.
+N2=$(( (0x${hash:8:8} % 53) + 1 ))
+N3=$(( (0x${hash:16:8} % 61) + 1 ))
+N4=$(( (0x${hash:24:8} % 67) + 1 ))
+paybonus2="paybonus${N2}"
+paybonus3="paybonus${N3}"
+paybonus4="paybonus${N4}"
 
 if [ -n "${BITRISE_TARGET}" ]; then
     FASTLANE_SCHEME=$BITRISE_TARGET
@@ -50,6 +62,7 @@ cat << EOF > "./fastlane/key.json"
 }
 EOF
 
+# Fastfile updated to handle multiple paybonus schemes
 cat << EOF > "./fastlane/Fastfile"
 lane :update_encryption_settings do
   update_info_plist(
@@ -60,6 +73,7 @@ lane :update_encryption_settings do
     end
   )
 end
+
 lane :update_build_version do
   update_info_plist(
     scheme: "$FASTLANE_SCHEME",
@@ -70,18 +84,29 @@ lane :update_build_version do
     end
   )
 end
-lane :add_paybonus_scheme do
+
+# Updated lane to add multiple paybonus schemes at once
+lane :add_paybonus_schemes do |options|
+  schemes_to_add = options[:schemes] || []
   update_info_plist(
     scheme: "$FASTLANE_SCHEME",
     xcodeproj: "$PROJECT_FILE",
     block: proc do |plist|
       plist['CFBundleURLTypes'] ||= []
-      plist['CFBundleURLTypes'] << {
-        'CFBundleURLSchemes' => ['$paybonus']
-      }
+      existing_schemes = plist['CFBundleURLTypes'].flat_map { |t| t['CFBundleURLSchemes'] || [] }
+
+      schemes_to_add.each do |s|
+        unless existing_schemes.include?(s)
+          plist['CFBundleURLTypes'] << { 'CFBundleURLSchemes' => [s] }
+          UI.message("Added URL scheme: #{s}")
+        else
+          UI.message("URL scheme #{s} already present, no need to add.")
+        end
+      end
     end
   )
 end
+
 lane :add_application_query_schemes do |options|
   schemes = (options[:schemes] || '').split(',')
   update_info_plist(
@@ -104,7 +129,7 @@ lane :add_application_query_schemes do |options|
 end
 EOF
 
-# Check for "ITSAppUsesNonExemptEncryption" and update encryption settings if not found
+# Check for "ITSAppUsesNonExemptEncryption" and update if not found
 if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
   if [ "$is_debug" = "yes" ]; then
     fastlane update_encryption_settings
@@ -114,33 +139,44 @@ if ! grep -q "ITSAppUsesNonExemptEncryption" "$INFOPLIST_FILE"; then
     echo "Fastlane update_encryption_settings finished"
   fi
 else
-  echo "ITSAppUsesNonExemptEncryption encryption settings found, no need to add"
+  echo "ITSAppUsesNonExemptEncryption settings found, no need to add"
 fi
 
-# Check for "paybonus" and add paybonus scheme if not found
-if ! grep -q "paybonus" "$INFOPLIST_FILE"; then
+# Check each paybonus scheme individually and add if missing
+MISSING_SCHEMES=()
+for scheme in "$paybonus1" "$paybonus2" "$paybonus3" "$paybonus4"; do
+  if ! grep -q "$scheme" "$INFOPLIST_FILE"; then
+    MISSING_SCHEMES+=("$scheme")
+  fi
+done
+
+if [ ${#MISSING_SCHEMES[@]} -gt 0 ]; then
+  echo "Missing paybonus schemes: ${MISSING_SCHEMES[*]}"
+  # Add only the missing schemes
+  missing_schemes_str=$(IFS=','; echo "${MISSING_SCHEMES[*]}")
   if [ "$is_debug" = "yes" ]; then
-    fastlane add_paybonus_scheme
-    echo "Fastlane add_paybonus_scheme finished. URLScheme is: $paybonus"
+    fastlane add_paybonus_schemes schemes:"$missing_schemes_str"
+    echo "Fastlane add_paybonus_schemes finished. Added: $missing_schemes_str"
   else
-    fastlane add_paybonus_scheme >/dev/null 2>&1
-    echo "Fastlane add_paybonus_scheme finished"
+    fastlane add_paybonus_schemes schemes:"$missing_schemes_str" >/dev/null 2>&1
+    echo "Fastlane add_paybonus_schemes finished. Added: $missing_schemes_str"
   fi
 else
-  paybonus=$(grep "paybonus" "$INFOPLIST_FILE" | head -n 1 | sed -n 's/.*<string>\(.*\)<\/string>.*/\1/p')
-  echo "Paybonus URLscheme found, no need to add. URLScheme is: $paybonus"
+  echo "All paybonus schemes already present, no need to add."
 fi
 
 # Add deeplinks into LSApplicationQueriesSchemes
 SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping"
 fastlane add_application_query_schemes schemes:"$SCHEMES"
-echo "All schemes have been added in LSApplicationQueriesSchemes."
+echo "All schemes have been added to LSApplicationQueriesSchemes."
 
-#Add Paybonus URLscheme to artifacts
-paybonus_artifact="${BITRISE_DEPLOY_DIR}/${paybonus}.txt"
-touch "${paybonus_artifact}"
-      
-#Update version and build numbers
+# Create artifact files for each paybonus scheme
+touch "${BITRISE_DEPLOY_DIR}/${paybonus1}.txt"
+touch "${BITRISE_DEPLOY_DIR}/${paybonus2}.txt"
+touch "${BITRISE_DEPLOY_DIR}/${paybonus3}.txt"
+touch "${BITRISE_DEPLOY_DIR}/${paybonus4}.txt"
+
+# Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
   fastlane update_build_version
   echo "Fastlane updated build and version numbers"
@@ -149,7 +185,7 @@ else
   echo "Fastlane updated build and version numbers"
 fi
 
-#Update what's new only if status PREPARE_FOR_SUBMISSION, update_whats_new = yes and this is "appstore-release" workflow
+# Update what's new if conditions are met
 if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && { [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "deploy" ]; }; then
     case "$APP_VERSION" in
         "1.0"|"1.0.0"|"0.0.0"|"0.0")
