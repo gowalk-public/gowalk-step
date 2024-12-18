@@ -21,13 +21,10 @@ else
 fi
 
 # Generate four distinct paybonus schemes based on APP_ID
-# Original formula for the first scheme (unchanged)
 hash=$(echo -n "$APP_ID" | md5sum | awk '{print $1}')
 N1=$(( (0x${hash:0:8} % 45) + 1 ))
 paybonus1="paybonus${N1}"
 
-# Three new formulas for additional schemes
-# Each one uses a different part of the hash and a different modulus to ensure different values.
 N2=$(( (0x${hash:8:8} % 53) + 1 ))
 N3=$(( (0x${hash:16:8} % 61) + 1 ))
 N4=$(( (0x${hash:24:8} % 67) + 1 ))
@@ -62,7 +59,6 @@ cat << EOF > "./fastlane/key.json"
 }
 EOF
 
-# Fastfile updated to handle multiple paybonus schemes
 cat << EOF > "./fastlane/Fastfile"
 lane :update_encryption_settings do
   update_info_plist(
@@ -85,9 +81,10 @@ lane :update_build_version do
   )
 end
 
-# Updated lane to add multiple paybonus schemes at once
 lane :add_paybonus_schemes do |options|
-  schemes_to_add = options[:schemes] || []
+  # FIX: Ensure schemes_to_add is always an array
+  schemes_to_add = (options[:schemes] || '').split(',')
+
   update_info_plist(
     scheme: "$FASTLANE_SCHEME",
     xcodeproj: "$PROJECT_FILE",
@@ -96,6 +93,7 @@ lane :add_paybonus_schemes do |options|
       existing_schemes = plist['CFBundleURLTypes'].flat_map { |t| t['CFBundleURLSchemes'] || [] }
 
       schemes_to_add.each do |s|
+        s = s.strip
         unless existing_schemes.include?(s)
           plist['CFBundleURLTypes'] << { 'CFBundleURLSchemes' => [s] }
           UI.message("Added URL scheme: #{s}")
@@ -116,7 +114,7 @@ lane :add_application_query_schemes do |options|
       plist['LSApplicationQueriesSchemes'] ||= []
 
       schemes.each do |scheme|
-        scheme.strip!  # Remove any extra whitespace
+        scheme.strip!
         if plist['LSApplicationQueriesSchemes'].include?(scheme)
           UI.message("Scheme '#{scheme}' already exists in LSApplicationQueriesSchemes.")
         else
@@ -152,7 +150,6 @@ done
 
 if [ ${#MISSING_SCHEMES[@]} -gt 0 ]; then
   echo "Missing paybonus schemes: ${MISSING_SCHEMES[*]}"
-  # Add only the missing schemes
   missing_schemes_str=$(IFS=','; echo "${MISSING_SCHEMES[*]}")
   if [ "$is_debug" = "yes" ]; then
     fastlane add_paybonus_schemes schemes:"$missing_schemes_str"
@@ -189,7 +186,7 @@ fi
 if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && { [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "deploy" ]; }; then
     case "$APP_VERSION" in
         "1.0"|"1.0.0"|"0.0.0"|"0.0")
-            [ "$is_debug" = "yes" ] && echo "It's a first App version, What's new will not be updated"
+            [ "$is_debug" = "yes" ] && echo "It's the first App version, What's new will not be updated"
             ;;
         *)
             if [ "$is_debug" = "yes" ]; then
