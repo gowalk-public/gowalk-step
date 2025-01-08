@@ -21,46 +21,51 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Function to generate a distinct paybonus number from 1..46
-# using a specific offset in the APP_ID hash and skipping duplicates.
+# Global array to track used paybonus numbers so they remain distinct:
+# ------------------------------------------------------------------------------
+USED_NUMBERS=()
+
+# ------------------------------------------------------------------------------
+# Function to generate a distinct paybonus number from 1..46, using a specific
+# offset in the MD5 hash and skipping duplicates deterministically.
 # ------------------------------------------------------------------------------
 function generate_distinct_paybonus() {
-  local offset="$1"        # Which 8-char segment of the hash to use
-  local -n used_ref="$2"   # Name reference to the array that keeps track of used paybonus numbers
+  local offset="$1"
+  # Extract an 8-character segment from the hash
   local part_hex="${hash:${offset}:8}"
-  # Convert that 8-char hex segment to an integer
-  local part=$((0x"$part_hex"))
+  # Interpret the hex as an integer (base 16)
+  local part=$((16#$part_hex))
 
-  # Our raw candidate is (part mod 46) + 1 -> ensures range 1..46
-  local candidate=$(( ( part % 46 ) + 1 ))
+  # Candidate is (part mod 46) + 1 => ensures 1..46
+  local candidate=$(( (part % 46) + 1 ))
 
-  # If candidate is already used, shift deterministically
-  while [[ " ${used_ref[*]} " =~ " $candidate " ]]; do
+  # If the candidate is already used, increment until we find a free number
+  # Wrapping around if we exceed 46
+  while [[ " ${USED_NUMBERS[*]} " =~ " $candidate " ]]; do
     candidate=$((candidate + 1))
-    if [[ $candidate -gt 46 ]]; then
+    if [ $candidate -gt 46 ]; then
       candidate=1
     fi
   done
 
-  # Mark this candidate as used, return it
-  used_ref+=( "$candidate" )
+  USED_NUMBERS+=("$candidate")
   echo "$candidate"
 }
 
 # Generate four distinct paybonus schemes based on APP_ID
 hash=$(echo -n "$APP_ID" | md5sum | awk '{print $1}')
-declare -a used_numbers=()
 
-N1=$(generate_distinct_paybonus 0  used_numbers)
-N2=$(generate_distinct_paybonus 8  used_numbers)
-N3=$(generate_distinct_paybonus 16 used_numbers)
-N4=$(generate_distinct_paybonus 24 used_numbers)
+N1=$(generate_distinct_paybonus 0)
+N2=$(generate_distinct_paybonus 8)
+N3=$(generate_distinct_paybonus 16)
+N4=$(generate_distinct_paybonus 24)
 
 paybonus1="paybonus${N1}"
 paybonus2="paybonus${N2}"
 paybonus3="paybonus${N3}"
 paybonus4="paybonus${N4}"
 
+# Decide which scheme name to use for Fastlane
 if [ -n "${BITRISE_TARGET}" ]; then
     FASTLANE_SCHEME=$BITRISE_TARGET
     [ "$is_debug" = "yes" ] && echo "For Fastlane will be used $BITRISE_TARGET"
