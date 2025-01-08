@@ -20,14 +20,43 @@ else
     echo "md5sum is already installed."
 fi
 
+# ------------------------------------------------------------------------------
+# Function to generate a distinct paybonus number from 1..46
+# using a specific offset in the APP_ID hash and skipping duplicates.
+# ------------------------------------------------------------------------------
+function generate_distinct_paybonus() {
+  local offset="$1"        # Which 8-char segment of the hash to use
+  local -n used_ref="$2"   # Name reference to the array that keeps track of used paybonus numbers
+  local part_hex="${hash:${offset}:8}"
+  # Convert that 8-char hex segment to an integer
+  local part=$((0x"$part_hex"))
+
+  # Our raw candidate is (part mod 46) + 1 -> ensures range 1..46
+  local candidate=$(( ( part % 46 ) + 1 ))
+
+  # If candidate is already used, shift deterministically
+  while [[ " ${used_ref[*]} " =~ " $candidate " ]]; do
+    candidate=$((candidate + 1))
+    if [[ $candidate -gt 46 ]]; then
+      candidate=1
+    fi
+  done
+
+  # Mark this candidate as used, return it
+  used_ref+=( "$candidate" )
+  echo "$candidate"
+}
+
 # Generate four distinct paybonus schemes based on APP_ID
 hash=$(echo -n "$APP_ID" | md5sum | awk '{print $1}')
-N1=$(( (0x${hash:0:8} % 45) + 1 ))
-paybonus1="paybonus${N1}"
+declare -a used_numbers=()
 
-N2=$(( (0x${hash:8:8} % 53) + 1 ))
-N3=$(( (0x${hash:16:8} % 61) + 1 ))
-N4=$(( (0x${hash:24:8} % 67) + 1 ))
+N1=$(generate_distinct_paybonus 0  used_numbers)
+N2=$(generate_distinct_paybonus 8  used_numbers)
+N3=$(generate_distinct_paybonus 16 used_numbers)
+N4=$(generate_distinct_paybonus 24 used_numbers)
+
+paybonus1="paybonus${N1}"
 paybonus2="paybonus${N2}"
 paybonus3="paybonus${N3}"
 paybonus4="paybonus${N4}"
@@ -82,7 +111,7 @@ lane :update_build_version do
 end
 
 lane :add_paybonus_schemes do |options|
-  # FIX: Ensure schemes_to_add is always an array
+  # Ensure schemes_to_add is always an array
   schemes_to_add = (options[:schemes] || '').split(',')
 
   update_info_plist(
