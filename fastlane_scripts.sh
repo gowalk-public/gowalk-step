@@ -159,6 +159,32 @@ lane :add_application_query_schemes do |options|
     end
   )
 end
+
+# ------------------------------------------------------------------------------
+# NEW CODE: A lane to remove any existing "paybonus" schemes from the Info.plist
+# ------------------------------------------------------------------------------
+lane :remove_paybonus_schemes do
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
+      next if plist['CFBundleURLTypes'].nil? or plist['CFBundleURLTypes'].empty?
+
+      new_url_types = []
+      plist['CFBundleURLTypes'].each do |url_type|
+        if url_type['CFBundleURLSchemes']
+          # filter out any CFBundleURLSchemes that contain "paybonus"
+          filtered_schemes = url_type['CFBundleURLSchemes'].reject { |s| s.include?('paybonus') }
+          # only add url_type if not empty after filtering
+          new_url_types << { 'CFBundleURLSchemes' => filtered_schemes } unless filtered_schemes.empty?
+        else
+          new_url_types << url_type
+        end
+      end
+      plist['CFBundleURLTypes'] = new_url_types
+    end
+  )
+end
 EOF
 
 # Check for "ITSAppUsesNonExemptEncryption" and update if not found
@@ -174,7 +200,25 @@ else
   echo "ITSAppUsesNonExemptEncryption settings found, no need to add"
 fi
 
-# Check each paybonus scheme individually and add if missing
+# ------------------------------------------------------------------------------
+# NEW CODE: First remove *all* paybonus schemes if present, so we start clean
+# ------------------------------------------------------------------------------
+if grep -q "paybonus" "$INFOPLIST_FILE"; then
+  echo "Found paybonus scheme(s) in Info.plist. Removing..."
+  if [ "$is_debug" = "yes" ]; then
+    fastlane remove_paybonus_schemes
+    echo "Fastlane remove_paybonus_schemes finished"
+  else
+    fastlane remove_paybonus_schemes >/dev/null 2>&1
+    echo "Fastlane remove_paybonus_schemes finished"
+  fi
+else
+  echo "No paybonus scheme found in Info.plist, no need to remove."
+fi
+
+# ------------------------------------------------------------------------------
+# OLD LOGIC: Now check each paybonus scheme individually (currently only paybonus1)
+# ------------------------------------------------------------------------------
 MISSING_SCHEMES=()
 #old for scheme in "$paybonus1" "$paybonus2" "$paybonus3" "$paybonus4"; do
 for scheme in "$paybonus1"; do
