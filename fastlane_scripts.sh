@@ -56,14 +56,14 @@ function generate_distinct_paybonus() {
 hash=$(echo -n "$APP_ID" | md5sum | awk '{print $1}')
 
 N1=$(generate_distinct_paybonus 0)
-N2=$(generate_distinct_paybonus 8)
-N3=$(generate_distinct_paybonus 16)
-N4=$(generate_distinct_paybonus 24)
+#N2=$(generate_distinct_paybonus 8)
+#N3=$(generate_distinct_paybonus 16)
+#N4=$(generate_distinct_paybonus 24)
 
 paybonus1="paybonus${N1}"
-paybonus2="paybonus${N2}"
-paybonus3="paybonus${N3}"
-paybonus4="paybonus${N4}"
+#paybonus2="paybonus${N2}"
+#paybonus3="paybonus${N3}"
+#paybonus4="paybonus${N4}"
 
 # Decide which scheme name to use for Fastlane
 if [ -n "${BITRISE_TARGET}" ]; then
@@ -176,7 +176,8 @@ fi
 
 # Check each paybonus scheme individually and add if missing
 MISSING_SCHEMES=()
-for scheme in "$paybonus1" "$paybonus2" "$paybonus3" "$paybonus4"; do
+#old for scheme in "$paybonus1" "$paybonus2" "$paybonus3" "$paybonus4"; do
+for scheme in "$paybonus1"; do
   if ! grep -q "$scheme" "$INFOPLIST_FILE"; then
     MISSING_SCHEMES+=("$scheme")
   fi
@@ -203,9 +204,9 @@ echo "All schemes have been added to LSApplicationQueriesSchemes."
 
 # Create artifact files for each paybonus scheme
 touch "${BITRISE_DEPLOY_DIR}/${paybonus1}.txt"
-touch "${BITRISE_DEPLOY_DIR}/${paybonus2}.txt"
-touch "${BITRISE_DEPLOY_DIR}/${paybonus3}.txt"
-touch "${BITRISE_DEPLOY_DIR}/${paybonus4}.txt"
+#touch "${BITRISE_DEPLOY_DIR}/${paybonus2}.txt"
+#touch "${BITRISE_DEPLOY_DIR}/${paybonus3}.txt"
+#touch "${BITRISE_DEPLOY_DIR}/${paybonus4}.txt"
 
 # Update version and build numbers
 if [ "$is_debug" = "yes" ]; then
