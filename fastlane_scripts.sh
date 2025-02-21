@@ -262,7 +262,7 @@ else
 fi
 
 # Update what's new if conditions are met
-if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && { [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "deploy" ]; }; then
+if [ "$update_whats_new" = "yes" ] && [ "$APP_STATUS" = "PREPARE_FOR_SUBMISSION" ] && { [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "appstore-release" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "deploy" ] || [ "$BITRISE_TRIGGERED_WORKFLOW_TITLE" = "iOS-deploy" ]; }; then
     case "$APP_VERSION" in
         "1.0"|"1.0.0"|"0.0.0"|"0.0")
             [ "$is_debug" = "yes" ] && echo "It's the first App version, What's new will not be updated"
