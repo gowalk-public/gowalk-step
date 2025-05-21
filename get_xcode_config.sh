@@ -26,7 +26,6 @@ output=$(xcodebuild \
   -showBuildSettings \
   -skipPackageUpdates \
   -skipPackagePluginValidation \
-  -disableAutomaticPackageResolution \
   -verbose
 )
 set +x
