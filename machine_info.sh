@@ -5,7 +5,7 @@ echo ""
 
 # Public IP Address
 echo "Public IP Address:"
-curl -s ifconfig.me
+curl -s --max-time 10 ifconfig.me
 echo ""
 echo "------------------------"
 
