@@ -19,16 +19,15 @@ fi
 
 echo "running xcodebuild -showBuildSettings with verbose logs."
 set -x
+
 output=$(xcodebuild \
   -project "${PROJECT_FILE}" \
   -scheme "${SCHEME_TO_USE}" \
-  -configuration Release \
   -showBuildSettings \
   -skipPackageUpdates \
   -skipPackagePluginValidation \
   -disableAutomaticPackageResolution \
-  -verbose \
-  -showBuildTimingSummary
+  -verbose
 )
 set +x
 
