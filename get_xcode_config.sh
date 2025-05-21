@@ -17,16 +17,7 @@ if [ -z "${SCHEME_TO_USE}" ]; then
     exit 1
 fi
 
-# (Optional) Pre-resolve Swift Packages:
-echo "Resolving Swift Packages..."
-set -x
-xcodebuild \
-  -project "${PROJECT_FILE}" \
-  -scheme "${SCHEME_TO_USE}" \
-  -resolvePackageDependencies
-set +x
-
-echo "Now running xcodebuild -showBuildSettings with verbose logs."
+echo "running xcodebuild -showBuildSettings with verbose logs."
 set -x
 output=$(xcodebuild \
   -project "${PROJECT_FILE}" \
