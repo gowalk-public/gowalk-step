@@ -19,19 +19,22 @@ fi
 
 echo "running xcodebuild -showBuildSettings with verbose logs."
 set -x
+set -o pipefail   # fail the script if xcodebuild itself fails
 
-output=$(xcodebuild \
-  -project "${PROJECT_FILE}" \
-  -scheme "${SCHEME_TO_USE}" \
-  -showBuildSettings \
-  -skipPackageUpdates \
-  -skipPackagePluginValidation \
-  -verbose \
-  OTHER_SWIFT_FLAGS="-D DISABLE_SSL_PINNING -D DEBUG_SCREEN_ENABLED -D LOGGING_ENABLED"
+output=$(
+  xcodebuild \
+    -project "${PROJECT_FILE}" \
+    -scheme "${SCHEME_TO_USE}" \
+    -showBuildSettings \
+    -skipPackageUpdates \
+    -skipPackagePluginValidation \
+    -verbose \
+    OTHER_SWIFT_FLAGS="-D DISABLE_SSL_PINNING -D DEBUG_SCREEN_ENABLED -D LOGGING_ENABLED" \
+    2>&1 | tee /dev/stderr          # <-- prints live, also captured
 )
 set +x
 
-# Continue extracting PRODUCT_BUNDLE_IDENTIFIER etc. 
+# Continue extracting PRODUCT_BUNDLE_IDENTIFIER etc.
 echo "Step Find the line containing PRODUCT_BUNDLE_IDENTIFIER"
 bundle_identifier=$(echo "$output" | grep -E "^ *PRODUCT_BUNDLE_IDENTIFIER =" | cut -d '=' -f2 | xargs)
 
