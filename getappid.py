@@ -29,8 +29,17 @@ headers = {
     'Content-Type': 'application/json'
 }
 
-# Make the request to list apps
-response = requests.get('https://api.appstoreconnect.apple.com/v1/apps', headers=headers)
+# Make the request to list apps with timeout and error handling
+print("Requesting App ID from Apple...")
+try:
+    response = requests.get(
+        'https://api.appstoreconnect.apple.com/v1/apps',
+        headers=headers,
+        timeout=30
+    )
+except requests.exceptions.RequestException as e:
+    print(f"Network error while requesting app list: {e}")
+    sys.exit(1)
 
 # Try to parse the response as JSON
 try:

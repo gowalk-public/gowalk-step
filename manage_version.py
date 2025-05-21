@@ -42,7 +42,10 @@ def get_latest_app_version(app_id, jwt_token):
     url = f'https://api.appstoreconnect.apple.com/v1/apps/{app_id}/appStoreVersions'
 
     # Make the GET request
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers, timeout=30)
+    except requests.exceptions.RequestException as e:
+        return {"versionString": None, "appStoreVersionId": None, "error": f"Network error: {e}"}
     # Comment if not debug
     #print(f"The get_latest_app_version response is: {response.json()}")
     # Check if the request was successful
@@ -107,7 +110,10 @@ def create_app_store_version(app_id, version_string, jwt_token):
             }
         }
     }
-    response = requests.post(url, json=payload, headers=headers)
+    try:
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Network error: {e}"}
     # Comment if not debug
     #print(f"The create_app_store_version response is: {response.json()}")
     return response.json()
