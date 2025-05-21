@@ -4,11 +4,11 @@ echo "Step Get Xcode Config"
 
 if [ -n "${BITRISE_TARGET}" ]; then
     echo "To get Xcode Config will be used BITRISE_TARGET"
-    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_TARGET\" -configuration Release -showBuildSettings -disableAutomaticPackageResolution"
+    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_TARGET\" -configuration Release -showBuildSettings -skipPackageUpdates -skipPackagePluginValidation -disableAutomaticPackageResolution"
     output=$(xcodebuild -project "$PROJECT_FILE" -target "$BITRISE_TARGET" -configuration Release -showBuildSettings)
 else
     echo "To get Xcode Config will be used BITRISE_SCHEME"
-    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_SCHEME\" -configuration Release -showBuildSettings -disableAutomaticPackageResolution"
+    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_SCHEME\" -configuration Release -showBuildSettings -skipPackageUpdates -skipPackagePluginValidation -disableAutomaticPackageResolution"
     output=$(xcodebuild -project "$PROJECT_FILE" -target "$BITRISE_SCHEME" -configuration Release -showBuildSettings)
 fi
 
