@@ -3,11 +3,13 @@
 echo "Step Get Xcode Config"
 
 if [ -n "${BITRISE_TARGET}" ]; then
-    output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_TARGET" "-configuration" "Release" "-showBuildSettings")
     echo "To get Xcode Config will be used BITRISE_TARGET"
+    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_TARGET\" -configuration Release -showBuildSettings"
+    output=$(xcodebuild -project "$PROJECT_FILE" -target "$BITRISE_TARGET" -configuration Release -showBuildSettings)
 else
-    output=$(xcodebuild "-project" "$PROJECT_FILE" "-target" "$BITRISE_SCHEME" "-configuration" "Release" "-showBuildSettings")
     echo "To get Xcode Config will be used BITRISE_SCHEME"
+    echo "Running: xcodebuild -project \"$PROJECT_FILE\" -target \"$BITRISE_SCHEME\" -configuration Release -showBuildSettings"
+    output=$(xcodebuild -project "$PROJECT_FILE" -target "$BITRISE_SCHEME" -configuration Release -showBuildSettings)
 fi
 
 echo "Step Find the line containing PRODUCT_BUNDLE_IDENTIFIER"
