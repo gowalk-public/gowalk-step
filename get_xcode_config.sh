@@ -26,7 +26,8 @@ output=$(xcodebuild \
   -showBuildSettings \
   -skipPackageUpdates \
   -skipPackagePluginValidation \
-  -verbose
+  -verbose \
+  OTHER_SWIFT_FLAGS="-D DISABLE_SSL_PINNING -D DEBUG_SCREEN_ENABLED -D LOGGING_ENABLED"
 )
 set +x
 
