@@ -53,6 +53,45 @@ echo "------------------------"
 
 # Display Information
 echo "Display Information:"
-system_profiler SPDisplaysDataType
+
+# Prefer timeout/gtimeout if available
+timeout_cmd=""
+if command -v timeout >/dev/null 2>&1; then
+    timeout_cmd="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+    timeout_cmd="gtimeout"
+fi
+
+# Check for setsid which allows killing the whole process group
+setsid_cmd=""
+if command -v setsid >/dev/null 2>&1; then
+    setsid_cmd="setsid"
+fi
+
+if [ -n "$timeout_cmd" ]; then
+    if [ -n "$setsid_cmd" ]; then
+        echo "Using $timeout_cmd with $setsid_cmd for system_profiler"
+        $timeout_cmd 10 $setsid_cmd system_profiler SPDisplaysDataType || echo "Failed or timeout retrieving display info"
+    else
+        echo "setsid not found; running system_profiler without it"
+        $timeout_cmd 10 system_profiler SPDisplaysDataType || echo "Failed or timeout retrieving display info"
+    fi
+else
+    echo "timeout not available; running manual background kill logic"
+    if [ -n "$setsid_cmd" ]; then
+        $setsid_cmd system_profiler SPDisplaysDataType &
+    else
+        system_profiler SPDisplaysDataType &
+    fi
+    sp_pid=$!
+    {
+        sleep 10
+        if kill -0 $sp_pid >/dev/null 2>&1; then
+            echo "Manually killing hanging system_profiler (pid $sp_pid)"
+            kill -9 $sp_pid >/dev/null 2>&1
+        fi
+    } &
+    wait $sp_pid 2>/dev/null || true
+fi
 echo ""
 echo "------------------------"
