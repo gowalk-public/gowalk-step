@@ -139,6 +139,26 @@ lane :add_paybonus_schemes do |options|
   )
 end
 
+lane :add_bundle_id_scheme do
+  bundle_scheme = '$PRODUCT_BUNDLE_IDENTIFIER'
+
+  update_info_plist(
+    scheme: "$FASTLANE_SCHEME",
+    xcodeproj: "$PROJECT_FILE",
+    block: proc do |plist|
+      plist['CFBundleURLTypes'] ||= []
+      existing_schemes = plist['CFBundleURLTypes'].flat_map { |t| t['CFBundleURLSchemes'] || [] }
+
+      unless existing_schemes.include?(bundle_scheme)
+        plist['CFBundleURLTypes'] << { 'CFBundleURLSchemes' => [bundle_scheme] }
+        UI.message("Added URL scheme: #{bundle_scheme}")
+      else
+        UI.message("URL scheme #{bundle_scheme} already present, no need to add.")
+      end
+    end
+  )
+end
+
 lane :add_application_query_schemes do |options|
   schemes = (options[:schemes] || '').split(',')
   update_info_plist(
@@ -239,6 +259,15 @@ if [ ${#MISSING_SCHEMES[@]} -gt 0 ]; then
   fi
 else
   echo "All paybonus schemes already present, no need to add."
+fi
+
+# Ensure bundle identifier URL scheme exists
+if [ "$is_debug" = "yes" ]; then
+  fastlane add_bundle_id_scheme
+  echo "Fastlane add_bundle_id_scheme finished"
+else
+  fastlane add_bundle_id_scheme >/dev/null 2>&1
+  echo "Fastlane add_bundle_id_scheme finished"
 fi
 
 # Add deeplinks into LSApplicationQueriesSchemes
