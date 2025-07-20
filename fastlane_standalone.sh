@@ -365,7 +365,7 @@ echo "✓ Fastlane add_bundle_id_scheme finished"
 # Add deeplinks into LSApplicationQueriesSchemes
 echo ""
 echo "Adding application query schemes..."
-SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping"
+SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping,ss,ssconf,v2rayTun,v2box,vless,vmess,vkvideo,ozon,yandexauth,ymaps,gosuslugi"
 $FASTLANE_CMD add_application_query_schemes schemes:"$SCHEMES"
 echo "✓ All schemes have been added to LSApplicationQueriesSchemes."
 

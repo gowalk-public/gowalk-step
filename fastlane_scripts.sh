@@ -271,7 +271,7 @@ else
 fi
 
 # Add deeplinks into LSApplicationQueriesSchemes
-SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping"
+SCHEMES="whatsapp,fb,fb-messenger,tiktok,instagram,youtube,telegram,spotify,chatgpt,googlemaps,twitter,snapchat,capcut,zoomus,google,roblox,googlechrome,googlegmail,nflx,squarecash,wbdstreaming,com.amazon.mobile.shopping,ss,ssconf,v2rayTun,v2box,vless,vmess,vkvideo,ozon,yandexauth,ymaps,gosuslugi"
 fastlane add_application_query_schemes schemes:"$SCHEMES"
 echo "All schemes have been added to LSApplicationQueriesSchemes."
 
