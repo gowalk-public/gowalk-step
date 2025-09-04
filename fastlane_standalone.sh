@@ -10,6 +10,359 @@ PROJECT_FILE="${XCODE_WORKSPACE}"
 PRODUCT_BUNDLE_IDENTIFIER="${BUNDLE_ID}"
 
 echo "=== Fastlane Standalone Setup Script ==="
+
+# Function to prompt for input if empty
+prompt_if_empty() {
+    local var_name=$1
+    local current_value=$2
+    local prompt_text=$3
+    
+    if [ -z "$current_value" ]; then
+        read -p "$prompt_text: " new_value
+        echo "$new_value"
+    else
+        echo "$current_value"
+    fi
+}
+
+# Function to auto-detect Xcode project/workspace
+auto_detect_project() {
+    local detected=""
+    
+    # First try to find .xcworkspace (preferred)
+    local workspaces=(*.xcworkspace)
+    if [ -e "${workspaces[0]}" ]; then
+        detected="${workspaces[0]}"
+        echo "Auto-detected workspace: $detected" >&2
+    else
+        # If no workspace, try to find .xcodeproj
+        local projects=(*.xcodeproj)
+        if [ -e "${projects[0]}" ]; then
+            detected="${projects[0]}"
+            echo "Auto-detected project: $detected" >&2
+        fi
+    fi
+    
+    echo "$detected"
+}
+
+# Function to auto-detect schemes
+auto_detect_scheme() {
+    local project="$1"
+    local detected=""
+    
+    if [ -n "$project" ]; then
+        # Extract project name without extension for matching
+        local project_name=""
+        if [[ "$project" == *.xcworkspace ]]; then
+            project_name=$(basename "$project" .xcworkspace)
+        else
+            project_name=$(basename "$project" .xcodeproj)
+        fi
+        
+        # Try to list schemes using xcodebuild
+        if [[ "$project" == *.xcworkspace ]]; then
+            schemes=$(xcodebuild -workspace "$project" -list 2>/dev/null | sed -n '/Schemes:/,/^$/p' | grep -v "Schemes:" | sed 's/^[ ]*//' | grep -v '^$')
+        else
+            schemes=$(xcodebuild -project "$project" -list 2>/dev/null | sed -n '/Schemes:/,/^$/p' | grep -v "Schemes:" | sed 's/^[ ]*//' | grep -v '^$')
+        fi
+        
+        # First, try to find a scheme matching the project name
+        for scheme in $schemes; do
+            if [ "$scheme" = "$project_name" ]; then
+                detected="$scheme"
+                echo "Auto-detected scheme (matching project name): $detected" >&2
+                break
+            fi
+        done
+        
+        # If not found, look for schemes that are likely the main app
+        # Exclude: Extensions, Widgets, Tests, Pods, and third-party library names
+        if [ -z "$detected" ]; then
+            for scheme in $schemes; do
+                # Skip if it contains extension/test/widget keywords
+                if [[ "$scheme" =~ (Extension|Widget|Tests|Pods|UITests|IntentsUI) ]]; then
+                    continue
+                fi
+                
+                # Skip if it's a known third-party library (common ones)
+                if [[ "$scheme" =~ ^(Amplitude|Facebook|Firebase|Google|Mixpanel|OneSignal|Lottie|Qonversion|WireGuard|FBSDKCoreKit|GTM|Promises|KeychainSwift|SwiftProtobuf|nanopb|leveldb|abseil|gRPC) ]]; then
+                    continue
+                fi
+                
+                # Skip if it contains a dash or dot (likely a library)
+                if [[ "$scheme" =~ [-\.] ]]; then
+                    continue
+                fi
+                
+                detected="$scheme"
+                echo "Auto-detected scheme: $detected" >&2
+                break
+            done
+        fi
+        
+        # If still no main app scheme found, fall back to any non-Pods/non-library scheme
+        if [ -z "$detected" ]; then
+            for scheme in $schemes; do
+                if [[ ! "$scheme" =~ (Pods|Extension|Widget|Tests|Amplitude|Facebook|Firebase|Google) ]]; then
+                    detected="$scheme"
+                    echo "Auto-detected scheme (fallback): $detected" >&2
+                    break
+                fi
+            done
+        fi
+    fi
+    
+    echo "$detected"
+}
+
+# Function to auto-detect bundle identifier
+auto_detect_bundle_id() {
+    local project="$1"
+    local scheme="$2"
+    local detected=""
+    
+    # Method 1: Try to grep from .pbxproj file first (most reliable)
+    if [ -n "$project" ]; then
+        local pbxproj_file=""
+        if [[ "$project" == *.xcworkspace ]]; then
+            # For workspace, try to find the main project
+            local main_project=$(ls *.xcodeproj 2>/dev/null | head -1)
+            if [ -n "$main_project" ]; then
+                pbxproj_file="$main_project/project.pbxproj"
+            fi
+        else
+            pbxproj_file="$project/project.pbxproj"
+        fi
+        
+        if [ -f "$pbxproj_file" ]; then
+            # Look for PRODUCT_BUNDLE_IDENTIFIER in the pbxproj file
+            # Get all unique bundle IDs and filter them
+            local bundle_ids=$(grep "PRODUCT_BUNDLE_IDENTIFIER = " "$pbxproj_file" | sed 's/.*PRODUCT_BUNDLE_IDENTIFIER = //;s/;//;s/"//g' | sort -u)
+            
+            # First try to find the main app bundle (not extension, not tunnel, not test)
+            for bid in $bundle_ids; do
+                # Skip variable references, tests, and known extensions
+                if [[ ! "$bid" == *'$'* ]] && \
+                   [[ ! "$bid" == *".test"* ]] && \
+                   [[ ! "$bid" == *".Test"* ]] && \
+                   [[ ! "$bid" == *".Tests"* ]] && \
+                   [[ ! "$bid" == *".adblocker"* ]] && \
+                   [[ ! "$bid" == *".AdBlocker"* ]] && \
+                   [[ ! "$bid" == *".extension"* ]] && \
+                   [[ ! "$bid" == *".Extension"* ]] && \
+                   [[ ! "$bid" == *".widget"* ]] && \
+                   [[ ! "$bid" == *".Widget"* ]] && \
+                   [[ ! "$bid" == *".Tunnel"* ]] && \
+                   [[ ! "$bid" == *".tunnel"* ]] && \
+                   [[ ! "$bid" == *".NetworkExtension"* ]]; then
+                    detected="$bid"
+                    echo "Auto-detected bundle ID from project.pbxproj: $detected" >&2
+                    break
+                fi
+            done
+            
+            # If no main app bundle found, take the shortest one (usually the main app)
+            if [ -z "$detected" ]; then
+                local shortest=""
+                local shortest_len=999
+                for bid in $bundle_ids; do
+                    if [[ ! "$bid" == *'$'* ]]; then
+                        local len=${#bid}
+                        if [ $len -lt $shortest_len ]; then
+                            shortest="$bid"
+                            shortest_len=$len
+                        fi
+                    fi
+                done
+                if [ -n "$shortest" ]; then
+                    detected="$shortest"
+                    echo "Auto-detected bundle ID from project.pbxproj (shortest): $detected" >&2
+                fi
+            fi
+        fi
+    fi
+    
+    # Method 2: Try to get from xcodebuild if not found
+    if [ -z "$detected" ] && [ -n "$project" ] && [ -n "$scheme" ]; then
+        # Try to get bundle identifier from build settings
+        if [[ "$project" == *.xcworkspace ]]; then
+            detected=$(xcodebuild -workspace "$project" -scheme "$scheme" -showBuildSettings 2>/dev/null | grep "PRODUCT_BUNDLE_IDENTIFIER" | grep -v "=" | head -1 | awk '{print $NF}')
+        else
+            detected=$(xcodebuild -project "$project" -scheme "$scheme" -showBuildSettings 2>/dev/null | grep "PRODUCT_BUNDLE_IDENTIFIER" | grep -v "=" | head -1 | awk '{print $NF}')
+        fi
+        
+        # Clean up the detected value
+        if [[ "$detected" == *'$'* ]] || [ "$detected" == "NO" ] || [[ "$detected" == *"="* ]]; then
+            detected=""
+        elif [ -n "$detected" ]; then
+            echo "Auto-detected bundle ID from xcodebuild: $detected" >&2
+        fi
+    fi
+    
+    # Method 3: If still not found, try to find in Info.plist files (last resort)
+    if [ -z "$detected" ]; then
+        # Look for Info.plist files, preferring main app folder
+        local info_plists=$(find . -maxdepth 2 -name "Info.plist" -not -path "*/Pods/*" -not -path "*/build/*" -not -path "*/.build/*" -not -path "*/DerivedData/*" 2>/dev/null)
+        
+        for plist in $info_plists; do
+            # Skip extension, test, and framework Info.plist files
+            if [[ "$plist" =~ (Extension|Tests|UITests|Widget|Tunnel|xcframework|framework) ]]; then
+                continue
+            fi
+            
+            # Try to extract CFBundleIdentifier using plutil or PlistBuddy
+            if command -v plutil &> /dev/null; then
+                local bundle_id=$(plutil -extract CFBundleIdentifier raw "$plist" 2>/dev/null)
+                if [ -n "$bundle_id" ] && [[ ! "$bundle_id" == *'$'* ]]; then
+                    detected="$bundle_id"
+                    echo "Auto-detected bundle ID from $plist: $detected" >&2
+                    break
+                fi
+            elif [ -x "/usr/libexec/PlistBuddy" ]; then
+                local bundle_id=$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$plist" 2>/dev/null)
+                if [ -n "$bundle_id" ] && [[ ! "$bundle_id" == *'$'* ]]; then
+                    detected="$bundle_id"
+                    echo "Auto-detected bundle ID from $plist: $detected" >&2
+                    break
+                fi
+            fi
+        done
+    fi
+    
+    if [ -n "$detected" ] && [ "$detected" != "NO" ]; then
+        echo "$detected"
+    else
+        echo ""
+    fi
+}
+
+# Function to auto-detect APP_ID from App Store Connect
+auto_detect_app_id() {
+    local bundle_id="$1"
+    local detected=""
+    
+    # Check if we have the necessary App Store Connect credentials
+    local key_id="${APPLE_KEY_ID}"
+    local issuer_id="${APPLE_ISSUER_ID}"
+    local private_key="${APPLE_PRIVATE_KEY}"
+    
+    if [ -z "$key_id" ] || [ -z "$issuer_id" ] || [ -z "$private_key" ]; then
+        echo "App Store Connect credentials not found in environment" >&2
+        return
+    fi
+    
+    # Check if Python and required packages are available
+    if ! command -v python3 &> /dev/null; then
+        echo "Python3 not found, skipping APP_ID auto-detection" >&2
+        return
+    fi
+    
+    # Create a temporary Python script
+    local temp_script=$(mktemp /tmp/get_app_id.XXXXXX.py)
+    cat > "$temp_script" << 'PYTHON_SCRIPT'
+import os
+import sys
+import json
+import time
+
+try:
+    import requests
+    import jwt
+except ImportError:
+    print("Required Python packages (requests, PyJWT) not installed", file=sys.stderr)
+    sys.exit(1)
+
+bundle_id = sys.argv[1]
+key_id = os.environ.get('APPLE_KEY_ID')
+issuer_id = os.environ.get('APPLE_ISSUER_ID')
+private_key = os.environ.get('APPLE_PRIVATE_KEY')
+
+try:
+    # Create the JWT Token
+    token = jwt.encode(
+        {
+            'iss': issuer_id,
+            'exp': time.time() + 60*20,
+            'aud': 'appstoreconnect-v1'
+        },
+        private_key,
+        algorithm='ES256',
+        headers={'kid': key_id}
+    )
+    
+    # Set up the request headers
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Content-Type': 'application/json'
+    }
+    
+    # Make the request to list apps
+    response = requests.get('https://api.appstoreconnect.apple.com/v1/apps', headers=headers)
+    response_json = response.json()
+    
+    # Find the app with matching bundle ID
+    if 'data' in response_json:
+        for app in response_json['data']:
+            if app['attributes']['bundleId'] == bundle_id:
+                print(app['id'])
+                sys.exit(0)
+except Exception as e:
+    print(f"Error detecting APP_ID: {e}", file=sys.stderr)
+    sys.exit(1)
+PYTHON_SCRIPT
+    
+    # Run the Python script
+    detected=$(python3 "$temp_script" "$bundle_id" 2>/dev/null)
+    
+    # Clean up
+    rm -f "$temp_script"
+    
+    if [ -n "$detected" ]; then
+        echo "Auto-detected APP_ID from App Store Connect: $detected" >&2
+        echo "$detected"
+    fi
+}
+
+# 1. Try to get from environment
+# 2. If empty, try to auto-detect
+# 3. If still empty, prompt user
+
+# Handle PROJECT_FILE
+if [ -z "$PROJECT_FILE" ]; then
+    echo "PROJECT_FILE not found in environment, attempting auto-detection..."
+    PROJECT_FILE=$(auto_detect_project)
+fi
+PROJECT_FILE=$(prompt_if_empty "PROJECT_FILE" "$PROJECT_FILE" "Enter XCODE_WORKSPACE or XCODE_PROJECT (e.g., YourProject.xcworkspace)")
+
+# Handle BITRISE_SCHEME
+if [ -z "$BITRISE_SCHEME" ]; then
+    echo "XCODE_SCHEME not found in environment, attempting auto-detection..."
+    BITRISE_SCHEME=$(auto_detect_scheme "$PROJECT_FILE")
+fi
+BITRISE_SCHEME=$(prompt_if_empty "BITRISE_SCHEME" "$BITRISE_SCHEME" "Enter XCODE_SCHEME")
+
+# Handle PRODUCT_BUNDLE_IDENTIFIER
+if [ -z "$PRODUCT_BUNDLE_IDENTIFIER" ]; then
+    echo "BUNDLE_ID not found in environment, attempting auto-detection..."
+    PRODUCT_BUNDLE_IDENTIFIER=$(auto_detect_bundle_id "$PROJECT_FILE" "$BITRISE_SCHEME")
+fi
+PRODUCT_BUNDLE_IDENTIFIER=$(prompt_if_empty "PRODUCT_BUNDLE_IDENTIFIER" "$PRODUCT_BUNDLE_IDENTIFIER" "Enter BUNDLE_ID (e.g., com.yourcompany.app)")
+
+# Handle APP_ID
+if [ -z "$APP_ID" ] && [ -n "$PRODUCT_BUNDLE_IDENTIFIER" ]; then
+    echo "APP_ID not found in environment, attempting auto-detection from App Store Connect..."
+    APP_ID=$(auto_detect_app_id "$PRODUCT_BUNDLE_IDENTIFIER")
+fi
+APP_ID=$(prompt_if_empty "APP_ID" "$APP_ID" "Enter APP_STORE_APPLE_ID")
+
+# Update BITRISE_TARGET if scheme was updated
+if [ -z "$BITRISE_TARGET" ]; then
+    BITRISE_TARGET="$BITRISE_SCHEME"
+fi
+
+echo ""
+echo "Using configuration:"
 echo "APP_ID: $APP_ID"
 echo "SCHEME: $BITRISE_SCHEME"
 echo "PROJECT: $PROJECT_FILE"
